@@ -2,11 +2,17 @@
 #define s21_decimal_h
 
 #include <stdio.h>
+#include <string.h>
 
 typedef struct 
 {
     int bits[4];
 } s21_decimal;
+
+int get_sign(s21_decimal d);
+void set_sign(s21_decimal *d, int sign);
+int get_scale(const s21_decimal *d);
+void set_scale(s21_decimal *d, int scale);
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
