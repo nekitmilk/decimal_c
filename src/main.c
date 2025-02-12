@@ -10,11 +10,12 @@ int main(int argc, const char * argv[]) {
     s21_decimal a = {0};
     s21_decimal result = {0};
 
-    a.bits[0] = 0xFFFF;
-    a.bits[3] = 0x80000000;
+    a.bits[0] = 0xFFFFFFFF;
+    a.bits[1] = 0xFFFFFFFF;
+    //a.bits[3] = 0x80000000;
     // a.bits[1] = 0xFFFFFFFF;
     // a.bits[2] = 0x8000000;
-    d.bits[2] = 0x19;
+    d.bits[0] = 0xFFFFFFFF;
     // d.bits[1] = 0xFFFFFFFF;
     // d.bits[2] = 0xFFFFF;
 
@@ -24,7 +25,7 @@ int main(int argc, const char * argv[]) {
     print_dec(d);
     printf("\n");
     // if (add_bits(&a, &d, &result) == 0) {
-    if (s21_add(a, d, &result) == 0) {
+    if (s21_sub(d, a, &result) == 0) {
         print_dec(result);
     }
     else {

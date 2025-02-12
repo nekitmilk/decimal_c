@@ -19,7 +19,6 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         if (compare_bits(value_1, value_2)) {
             overflow = sub_bits(&value_1, &value_2, result);
             set_sign(result, sign1);
-            printf("tut\n");
         }
         else {
             overflow = sub_bits(&value_2, &value_1, result);
@@ -43,6 +42,41 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
     return status;
     
+}
+
+// Вроде работает, нужны тесты
+int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    int status = 0;
+
+    s21_decimal negative_value_2 = {0};
+    s21_negate(value_2, &negative_value_2);
+
+    status = s21_add(value_1, negative_value_2, result);
+
+    return status;
+}
+
+// Нужны тесты (Аня)
+// Используется в s21_sub
+int s21_negate(s21_decimal value, s21_decimal *result) {
+    int status = 0;
+
+    memset(result, 0, sizeof(s21_decimal)); 
+
+    int sign = get_sign(value);
+
+    if (sign) {
+        set_sign(result, 0);
+    }
+    else {
+        set_sign(result, 1);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        result->bits[i] = value.bits[i];
+    }
+    
+    return status;
 }
 
 int get_sign(s21_decimal d) {
@@ -216,20 +250,4 @@ int compare_bits(s21_decimal a, s21_decimal b) {
     }
     
     return result;
-}
-
-
-// Добавить проверку, что конвертация прошла успешно и в зависимости от этого делать код возврата
-int s21_from_int_to_decimal(int src, s21_decimal *dst) {
-    memset(dst, 0, sizeof(s21_decimal)); // Обнуляем все биты
-
-    if (src < 0) {
-        set_sign(dst, 1);
-        src = -src;
-    }
-
-    dst->bits[0] = src; // Младшие 32 бита
-    set_scale(dst, 0); // Без дробной части
-
-    return 0;
 }
