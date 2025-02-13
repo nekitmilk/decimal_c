@@ -19,7 +19,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     int scale = (*bit >> 23) - 127;
     int mantissa =
         (scale == -127) ? (*bit && 0x7FFFFF) : (*bit && 0x7FFFFF) | 0x1000000;
-    for (; mantissa & 1 == 0; mantissa >>= 1) {
+    for (; (mantissa & 1) == 0; mantissa >>= 1) {
     }
     s21_from_int_to_decimal(mantissa * (sign ? -1 : 1), dst);
     if (src != (int)src) {
