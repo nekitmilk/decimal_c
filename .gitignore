@@ -2,3 +2,4 @@
 *.out
 *.gcno
 *.gcda
+*.a
