@@ -8,8 +8,8 @@ SRC_DIR = .
 OBJ_DIR = object_files
 TEST_DIR = tests
 
-DECIMAL_SRCS=$(wildcard $(SRC_DIR)/s21*.c)
-DECIMAL_HEADER=$(wildcard $(SRC_DIR)/s21*.h)
+DECIMAL_SRCS=$(wildcard $(SRC_DIR)/s21*.c) $(SRC_DIR)/utils.c
+DECIMAL_HEADER=$(wildcard $(SRC_DIR)/*.h)
 
 TEST_SRCS=$(wildcard $(TEST_DIR)/*.c)
 TEST_HEADERS=$(wildcard $(TEST_DIR)/*.h)
