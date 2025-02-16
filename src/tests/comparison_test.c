@@ -1,4 +1,4 @@
-#include "test.h"
+#include "test_runner.h"
 
 START_TEST(test_is_less_both_positive) {
   // val 1 = 12345678987654321, оно же 0x2BDC546291F4B1.
@@ -27,13 +27,19 @@ START_TEST(test_is_less_both_positive) {
 END_TEST
 
 Suite* comparison_suite(void) {
+  // создаём набор тестов, в данном случае - тесты для сравнения
   Suite* s = suite_create("s21_decimal_comparison_tests");
 
+  // создаём набор тестовых случаев - здесь тестируем сравнение "меньше"
+  // (is_less)
   TCase* tc_is_less = tcase_create("Is_less tests");
+
+  // добавляем наши тесты в набор тестовых случаев. в набор is_less (арг.1)
+  // добавляем тест (арг. 2)
   tcase_add_test(tc_is_less, test_is_less_both_positive);
 
-  // TCase* tc_is_less_or_equal = tcase_create("Is_less_or_equal tests");
-  // и т.д. 
+  // добавляем в общий набор тестов (s) добавляем набор случаев (tc_is_less)
+  suite_add_tcase(s, tc_is_less); 
 
   return s;
 }
