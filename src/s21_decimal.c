@@ -56,6 +56,57 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     return status;
 }
 
+
+// -123 * ( -23) -> будет положительное число
+// 123 * 23 -> будет положительное число
+// -123 * 23 -> будет отрицательное
+// Но по модулю они равны
+// 23,456 * 123,2345 -> 23,456 * 123456 / 10^3
+int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    int status = 0;
+    
+
+    memset(result, 0, sizeof(s21_decimal));
+    int sign1 = get_sign(value_1);
+    int sign2 = get_sign(value_2);
+
+    int scale_1 = get_scale(&value_1);
+    int scale_2 = get_scale(&value_2);
+
+    // for (int i = 0; i < scale_2; i++) {
+    //     multiply_by_10(&value_2);
+    // }
+    
+    // set_scale(&value_2, 0);
+    
+
+    s21_decimal zero = {0};
+    s21_decimal one = {1, 0, 0, 0};
+    s21_decimal sub_result = value_2;
+
+    if (sign2) {
+        set_sign(&sub_result, 0);
+    }
+    set_scale(&sub_result, 0);
+    
+    while (compare_bits(sub_result, zero) != -1)
+    {
+        s21_sub(sub_result, one, &sub_result);
+        status = s21_add(*result, value_1, result);
+    }
+
+
+    set_scale(result, scale_1 + scale_2);
+    if (sign1 > sign2) {
+        set_sign(result, sign1);
+    }
+    else {
+        set_sign(result, sign2);
+    }
+
+    return status;
+}
+
 // Нужны тесты (Аня)
 // Используется в s21_sub
 int s21_negate(s21_decimal value, s21_decimal *result) {
@@ -141,6 +192,8 @@ int multiply_by_10(s21_decimal *num) {
     if (!status) {
         add_bits(&temp2, &temp8, num);
     }
+
+    // Добавить установку масштаба - 1?
     
     return status;
 }
