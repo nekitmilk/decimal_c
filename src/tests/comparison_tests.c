@@ -1,29 +1,35 @@
 #include "test_runner.h"
-#define ADD_IS_LESS_TEST(testname) tcase_add_test(tc_is_less, testname)
+#define ASSERT ck_assert_uint_eq(expected_result, result);
+#define ADD_TEST_IS_LESS(testname) tcase_add_test(tc_is_less, testname)
+#define ADD_TEST_IS_LESS_OR_EQUAL(testname) \
+  tcase_add_test(tc_is_less_or_equal, testname)
+#define ADD_TEST_IS_GREATER(testname) tcase_add_test(tc_is_greater, testname)
+#define ADD_TEST_IS_GREATER_OR_EQUAL(testname) \
+  tcase_add_test(tc_is_greater_or_equal, testname)
+#define ADD_TEST_EDGE_CASES(testname) tcase_add_test(tc_edge_cases, testname)
+#define ADD_TEST_IS_EQUAL(testname) tcase_add_test(tc_is_equal, testname)
+#define ADD_TEST_IS_NOT_EQUAL(testname) \
+  tcase_add_test(tc_is_not_equal, testname)
 
+// IS LESS
 START_TEST(test_is_less_both_positive) {
-  // val 1 = 12345678987654321, оно же 0x2BDC546291F4B1.
-  // в одном знаке 4 бит, знаков 14, значит имеем дело с 56 бит.
-  // дополняем нулями до 96 бит, значит добавляем (96 - 56)/ 4 = 10 нулей
-  // - 0x00000000002BDC546291F4B1
+  // val 1 = 12345678987654321 == 0x2BDC546291F4B1.
   s21_decimal value_1;
   value_1.bits[2] = 0x00000000;  // старшие 32 бита
   value_1.bits[1] = 0x002BDC54;  // средние 32 бита
   value_1.bits[0] = 0x6291F4B1;  // младшие 32 бита
   value_1.bits[3] = 0x00000000;  // нет ни показателя степени, ни знака
 
-  // val 2 = 12345678912345678, оно же 0x2BDC545E14D64E
-  // 0x00000000002BDC545E14D64E
-
+  // val 2 = 12345678912345678 == 0x2BDC545E14D64E
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
 
   int expected_result = 0;
   int result = s21_is_less(value_1, value_2);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 
   expected_result = 1;
   result = s21_is_less(value_2, value_1);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 }
 END_TEST
 
@@ -40,11 +46,11 @@ START_TEST(test_is_less_one_negative) {
 
   int expected_result = 1;
   int result = s21_is_less(value_1, value_2);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 
   expected_result = 0;
   result = s21_is_less(value_2, value_1);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 }
 END_TEST
 
@@ -61,11 +67,21 @@ START_TEST(test_is_less_both_negative) {
 
   int expected_result = 1;
   int result = s21_is_less(value_1, value_2);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 
   expected_result = 0;
   result = s21_is_less(value_2, value_1);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
+}
+END_TEST
+
+START_TEST(test_is_less_both_equal_integers) {
+  s21_decimal value_1 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+  s21_decimal value_2 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+
+  int expected_result = 0;
+  int result = s21_is_less(value_1, value_2);
+  ASSERT;
 }
 END_TEST
 
@@ -82,11 +98,11 @@ START_TEST(test_is_less_both_positive_and_one_number_has_scale) {
 
   int expected_result = 1;
   int result = s21_is_less(value_1, value_2);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 
   expected_result = 0;
   result = s21_is_less(value_2, value_1);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 }
 END_TEST
 
@@ -99,11 +115,11 @@ START_TEST(test_is_less_both_equal_but_one_of_them_with_a_scale) {
 
   int expected_result = 1;
   int result = s21_is_less(value_1, value_2);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 
   expected_result = 0;
   result = s21_is_less(value_2, value_1);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 }
 END_TEST
 
@@ -117,11 +133,11 @@ START_TEST(
 
   int expected_result = 0;
   int result = s21_is_less(value_1, value_2);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 
   expected_result = 1;
   result = s21_is_less(value_2, value_1);
-  ck_assert_uint_eq(expected_result, result);
+  ASSERT;
 }
 END_TEST
 
@@ -137,6 +153,100 @@ START_TEST(test_is_less_with_two_values_with_scale) {
   ck_assert_int_eq(expected_result, result);
 }
 
+// IS_LESS_OR_EQUAL
+START_TEST(test_is_less_or_equal_both_equal_integers) {
+  s21_decimal value_1 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+  s21_decimal value_2 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+
+  int expected_result = 1;
+  int result = s21_is_less_or_equal(value_1, value_2);
+  ASSERT;
+}
+END_TEST
+
+START_TEST(test_is_less_or_equal_one_negative) {
+  s21_decimal value_1;
+  // число -12345678987654321
+  value_1.bits[2] = 0x00000000;  // старшие 32 бита
+  value_1.bits[1] = 0x002BDC54;  // средние 32 бита
+  value_1.bits[0] = 0x6291F4B1;  // младшие 32 бита
+  value_1.bits[3] = SIGN_MASK;   // отрицательное число
+
+  // число 12345678912345678
+  s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
+
+  int expected_result = 1;
+  int result = s21_is_less_or_equal(value_1, value_2);
+  ASSERT;
+
+  expected_result = 0;
+  result = s21_is_less_or_equal(value_2, value_1);
+  ASSERT;
+}
+END_TEST
+
+// IS GREATER
+START_TEST(test_is_greater_basic_case) {
+  s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0}};
+  s21_decimal value_2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 1 << 16}};
+
+  int expected_result = 1;
+  int result = s21_is_greater(value_1, value_2);
+  ASSERT;
+}
+
+START_TEST(test_is_greater_one_negative) {
+  // число -12345678987654321
+  s21_decimal value_1 = {{0x6291F4B1, 0x002BDC54, 0x00000000, SIGN_MASK}};
+
+  // число 12345678912345678
+  s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
+
+  int expected_result = 0;
+  int result = s21_is_greater(value_1, value_2);
+  ASSERT;
+
+  expected_result = 1;
+  result = s21_is_greater(value_2, value_1);
+  ASSERT;
+}
+END_TEST
+
+// IS GREATER OR EQUAL
+START_TEST(test_is_greater_or_equal_both_equal_integers) {
+  s21_decimal value_1 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+  s21_decimal value_2 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+
+  int expected_result = 1;
+  int result = s21_is_greater_or_equal(value_1, value_2);
+  ASSERT;
+}
+END_TEST
+
+// IS EQUAL
+START_TEST(test_is_equal_both_equal_integers) {
+  s21_decimal value_1 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+  s21_decimal value_2 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+
+  int expected_result = 1;
+  int result = s21_is_equal(value_1, value_2);
+  ASSERT;
+}
+END_TEST
+
+// IS NOT EQUAL
+
+START_TEST(test_is_not_equal_both_equal_integers) {
+  s21_decimal value_1 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+  s21_decimal value_2 = {{0xFAFAFAFA, 0xFAFAFAFA, 0xFAFAFAFA, 0}};
+
+  int expected_result = 0;
+  int result = s21_is_not_equal(value_1, value_2);
+  ASSERT;
+}
+END_TEST
+
+// EDGE CASES
 START_TEST(test_edge_cases_with_overflow_risk) {
   // максимальное число
   s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000}};
@@ -150,36 +260,77 @@ START_TEST(test_edge_cases_with_overflow_risk) {
 }
 END_TEST
 
+START_TEST(test_edge_cases_with_overflow_risk_2) {
+  s21_decimal value_1 = {{1, 0, 0, 0}};
+  s21_decimal value_2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFF, 28 << 16}};
+
+  int expected_result = 0;
+  int result = s21_is_less(value_1, value_2);
+  ck_assert_int_eq(expected_result, result);
+}
+
 Suite* comparison_suite(void) {
-  // создаём набор тестов, в данном случае - тесты для сравнения
+
   Suite* s = suite_create("s21_decimal_comparison_tests");
 
-  // создаём набор тестовых случаев - здесь тестируем сравнение "меньше"
-  // (is_less)
+  // IS LESS:
   TCase* tc_is_less = tcase_create("Is less tests");
+
+  ADD_TEST_IS_LESS(test_is_less_both_positive);
+  ADD_TEST_IS_LESS(test_is_less_one_negative);
+  ADD_TEST_IS_LESS(test_is_less_both_negative);
+  ADD_TEST_IS_LESS(test_is_less_both_equal_integers);
+  ADD_TEST_IS_LESS(test_is_less_both_positive_and_one_number_has_scale);
+  ADD_TEST_IS_LESS(test_is_less_both_equal_but_one_of_them_with_a_scale);
+  ADD_TEST_IS_LESS(
+      test_is_less_both_equal_but_one_of_them_with_a_scale_and_other_one_is_negative);
+  ADD_TEST_IS_LESS(test_is_less_with_two_values_with_scale);
+
+  suite_add_tcase(s, tc_is_less);
+
+  // IS LESS OR EQUAL:
+  TCase* tc_is_less_or_equal = tcase_create("Is less or equal tests");
+
+  ADD_TEST_IS_LESS_OR_EQUAL(test_is_less_or_equal_both_equal_integers);
+  ADD_TEST_IS_LESS_OR_EQUAL(test_is_less_or_equal_one_negative);
+
+  suite_add_tcase(s, tc_is_less_or_equal);
+
+  // IS GREATER:
+  TCase* tc_is_greater = tcase_create("Is greater tests");
+
+  ADD_TEST_IS_GREATER(test_is_greater_basic_case);
+  ADD_TEST_IS_GREATER(test_is_greater_one_negative);
+
+  suite_add_tcase(s, tc_is_greater);
+
+  // IS GREATER OR EQUAL:
+  TCase* tc_is_greater_or_equal = tcase_create("Is greater or equal tests");
+
+  ADD_TEST_IS_GREATER_OR_EQUAL(test_is_greater_or_equal_both_equal_integers);
+
+  suite_add_tcase(s, tc_is_greater_or_equal);
+
+  // IS EQUAL:
+  TCase* tc_is_equal = tcase_create("Is equal tests");
+
+  ADD_TEST_IS_EQUAL(test_is_equal_both_equal_integers);
+
+  suite_add_tcase(s, tc_is_equal);
+
+  // IS NOT EQUAL:
+  TCase* tc_is_not_equal = tcase_create("Is not equal tests");
+
+  ADD_TEST_IS_NOT_EQUAL(test_is_not_equal_both_equal_integers);
+
+  suite_add_tcase(s, tc_is_not_equal);
+
+  // EDGE CASES:
   TCase* tc_edge_cases = tcase_create("Edge cases");
 
-  // добавляем наши тесты в набор тестовых случаев. в набор is_less (арг.1)
-  // добавляем тест (арг. 2)
+  ADD_TEST_EDGE_CASES(test_edge_cases_with_overflow_risk);
+  ADD_TEST_EDGE_CASES(test_edge_cases_with_overflow_risk_2);
 
-  // ТЕСТЫ "МЕНЬШЕ"
-  ADD_IS_LESS_TEST(test_is_less_both_positive);
-  ADD_IS_LESS_TEST(test_is_less_one_negative);
-  ADD_IS_LESS_TEST(test_is_less_both_negative);
-  ADD_IS_LESS_TEST(test_is_less_both_positive_and_one_number_has_scale);
-  ADD_IS_LESS_TEST(test_is_less_both_equal_but_one_of_them_with_a_scale);
-  ADD_IS_LESS_TEST(
-      test_is_less_both_equal_but_one_of_them_with_a_scale_and_other_one_is_negative);
-  ADD_IS_LESS_TEST(test_is_less_with_two_values_with_scale);
-  ////////////////////////////////////////////////////////////
-
-  // ТЕСТЫ НА КРАЕВЫЕ СЛУЧАИ
-  tcase_add_test(tc_edge_cases, test_edge_cases_with_overflow_risk);
-
-  ////////////////////////////////////////////////////////////
-
-  // в общий набор тестов (s) добавляем набор случаев (tc_is_less)
-  suite_add_tcase(s, tc_is_less);
   suite_add_tcase(s, tc_edge_cases);
 
   return s;
