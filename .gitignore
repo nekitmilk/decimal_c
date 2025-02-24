@@ -3,3 +3,5 @@
 *.gcno
 *.gcda
 *.a
+sandbox.c
+launch.json
