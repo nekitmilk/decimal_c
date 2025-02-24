@@ -10,27 +10,40 @@ int main(int argc, const char * argv[]) {
     s21_decimal a = {0};
     s21_decimal result = {0};
 
-    a.bits[0] = 0xFFFFFFFF;
-    a.bits[1] = 0xFFFFFFFF;
+    a.bits[0] = 0x5;
+    // a.bits[1] = 0xFFFFFFFF;
     //a.bits[3] = 0x80000000;
     // a.bits[1] = 0xFFFFFFFF;
     // a.bits[2] = 0x8000000;
-    d.bits[0] = 0xFFFFFFFF;
+    d.bits[0] = 0x2;
+    d.bits[3] = 0x80000000;
+    set_scale(&d, 1);
     // d.bits[1] = 0xFFFFFFFF;
     // d.bits[2] = 0xFFFFF;
+
 
     
     print_dec(a);
     printf("\n");
     print_dec(d);
     printf("\n");
-    // if (add_bits(&a, &d, &result) == 0) {
-    if (s21_sub(d, a, &result) == 0) {
+
+    if (s21_mul(a, d, &result) == 0)
+    {
         print_dec(result);
     }
     else {
-        printf("too match");
+        printf("too mach\n");
     }
+    
+
+    // // if (add_bits(&a, &d, &result) == 0) {
+    // if (s21_sub(d, a, &result) == 0) {
+    //     print_dec(result);
+    // }
+    // else {
+    //     printf("too match");
+    // }
  
     // set_scale(&d, 20);
     // set_sign(&d, 1);
