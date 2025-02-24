@@ -22,6 +22,9 @@ int multiply_by_2(s21_decimal *num);
 int multiply_by_8(s21_decimal *num);
 int compare_bits(s21_decimal a, s21_decimal b);
 
+int div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result);
+int mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result);
+
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);

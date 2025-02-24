@@ -57,14 +57,8 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 }
 
 
-// -123 * ( -23) -> будет положительное число
-// 123 * 23 -> будет положительное число
-// -123 * 23 -> будет отрицательное
-// Но по модулю они равны
-// 23,456 * 123,2345 -> 23,456 * 123456 / 10^3
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    int status = 0;
-    
+    int status = 0; 
 
     memset(result, 0, sizeof(s21_decimal));
     int sign1 = get_sign(value_1);
@@ -72,13 +66,6 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
     int scale_1 = get_scale(&value_1);
     int scale_2 = get_scale(&value_2);
-
-    // for (int i = 0; i < scale_2; i++) {
-    //     multiply_by_10(&value_2);
-    // }
-    
-    // set_scale(&value_2, 0);
-    
 
     s21_decimal zero = {0};
     s21_decimal one = {1, 0, 0, 0};
@@ -89,12 +76,10 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
     set_scale(&sub_result, 0);
     
-    while (compare_bits(sub_result, zero) != -1)
-    {
+    while (compare_bits(sub_result, zero) != -1) {
         s21_sub(sub_result, one, &sub_result);
         status = s21_add(*result, value_1, result);
     }
-
 
     set_scale(result, scale_1 + scale_2);
     if (sign1 > sign2) {
@@ -105,6 +90,81 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
 
     return status;
+}
+
+int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    int status = 0;
+
+    memset(result, 0, sizeof(s21_decimal));
+
+    s21_decimal div_result = {0}; // хранит целую часть
+    s21_decimal fract_result = {0}; // Хранит число после запятой 
+    s21_decimal mod_result = {0}; // хранит остаток от деления
+
+    s21_decimal zero = {0};
+    s21_decimal ten = {10, 0, 0, 0};
+
+    if (is_zero(value_2)) {
+        status = 3;
+    }
+    else {
+        
+        div(value_1, value_2, &div_result); // Сохранили в div_result целочисленное деление
+        mod(value_1, value_2, &mod_result); // Сохраняем в mod_result остаток от деления
+        
+        int result_scale = 0;
+
+        while (!is_zero(mod_result) || result_scale == 28)
+        {
+            s21_decimal temp_div = {0};
+            result_scale += 1;
+
+            s21_mul(mod_result, ten, &mod_result);
+            div(mod_result, value_2, &temp_div);
+            s21_mul(fract_result, ten, &fract_result);
+            s21_add(fract_result, temp_div, &fract_result);
+        }
+        
+        set_scale(&fract_result, result_scale);
+        s21_add(div_result, fract_result, result);
+        
+    }
+    
+    return status;
+} // Добавить обработку слишком больших или сликом малых чисел в резултате
+// Добавить округление 
+
+// Функция выполняет целочисленное деление
+int div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
+    int status = 0;
+    s21_decimal one = {1, 0, 0, 0};
+
+    while (s21_is_less(value_2, value_1)) {
+        status = s21_sub(value_1, value_2, &value_1);
+        status = s21_add(*div_result, one, div_result);
+    } // целочисленное деление
+
+    return status;
+}
+
+int mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *mod_result) {
+    int status = 0;
+
+    while (s21_is_less(value_2, value_1)) {
+        status = s21_sub(value_1, value_2, &value_1);
+    } // поиск остатка от деления
+
+    if (!status) {
+        *mod_result = value_1;
+    }
+
+    return status;
+}
+
+// Проверяет является ли число нулем
+// Если это ноль, то возвращает 1, иначе 0
+int is_zero(s21_decimal num) {
+    return (num.bits[0] == 0 && num.bits[1] == 0 && num.bits[2] == 0);
 }
 
 // Нужны тесты (Аня)
@@ -292,7 +352,7 @@ int sub_bits(s21_decimal *a, s21_decimal *b, s21_decimal *result) {
 }
 
 // Сравнение абсолютных значенией
-// 1 - a > b; 0 - a < b; -1 - something wrong
+// 1 - a > b; 0 - a < b; -1 - a = b
 // Вроде работает
 int compare_bits(s21_decimal a, s21_decimal b) {
     int result = -1;
