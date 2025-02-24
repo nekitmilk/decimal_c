@@ -1,0 +1,7 @@
+*.o
+*.out
+*.gcno
+*.gcda
+*.a
+sandbox.c
+launch.json
