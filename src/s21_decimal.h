@@ -25,6 +25,7 @@ int compare_bits(s21_decimal a, s21_decimal b);
 
 int div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result);
 int mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result);
+int is_zero(s21_decimal num);
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);

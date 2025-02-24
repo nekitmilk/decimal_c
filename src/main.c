@@ -3,6 +3,8 @@
 #include "s21_decimal.h"
 #include "s21_print_decimal.h"
 
+// gcc main.c s21_decimal.c s21_comparison.c utils.c
+
 void print_dec(s21_decimal d);
 
 int main(int argc, const char* argv[]) {
@@ -10,14 +12,15 @@ int main(int argc, const char* argv[]) {
   s21_decimal a = {0};
   s21_decimal result = {0};
 
-    a.bits[0] = 0x5;
+    a.bits[0] = 0xA;
+    // set_scale(&a, 2);
+
     // a.bits[1] = 0xFFFFFFFF;
-    //a.bits[3] = 0x80000000;
-    // a.bits[1] = 0xFFFFFFFF;
-    // a.bits[2] = 0x8000000;
+    // a.bits[2] = 0xFFFFFFFF;
     d.bits[0] = 0x2;
-    d.bits[3] = 0x80000000;
-    set_scale(&d, 1);
+    // set_sign(&d, 1);
+    //d.bits[3] = 0x80000000;
+    // set_scale(&d, 10);
     // d.bits[1] = 0xFFFFFFFF;
     // d.bits[2] = 0xFFFFF;
 
@@ -28,7 +31,7 @@ int main(int argc, const char* argv[]) {
     print_dec(d);
     printf("\n");
 
-    if (s21_mul(a, d, &result) == 0)
+    if (s21_div(a, d, &result) == 0)
     {
         print_dec(result);
     }

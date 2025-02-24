@@ -89,7 +89,6 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int status = 0;
-
     memset(result, 0, sizeof(s21_decimal));
 
     s21_decimal div_result = {0}; // хранит целую часть
@@ -103,19 +102,20 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         status = 3;
     }
     else {
-        
         div(value_1, value_2, &div_result); // Сохранили в div_result целочисленное деление
         mod(value_1, value_2, &mod_result); // Сохраняем в mod_result остаток от деления
         
         int result_scale = 0;
 
-        while (!is_zero(mod_result) || result_scale == 28)
+        while (!is_zero(mod_result) && result_scale < 28)
         {
             s21_decimal temp_div = {0};
             result_scale += 1;
+            printf("res_scale: %d\n",result_scale);
 
             s21_mul(mod_result, ten, &mod_result);
             div(mod_result, value_2, &temp_div);
+            mod(mod_result, value_2, &mod_result);
             s21_mul(fract_result, ten, &fract_result);
             s21_add(fract_result, temp_div, &fract_result);
         }
@@ -126,7 +126,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
     
     return status;
-} // Добавить обработку слишком больших или сликом малых чисел в резултате
+} // Добавить обработку слишком больших или сликом малых чисел в результате
 // Добавить округление 
 
 // Функция выполняет целочисленное деление
@@ -134,18 +134,27 @@ int div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
     int status = 0;
     s21_decimal one = {1, 0, 0, 0};
 
-    while (s21_is_less(value_2, value_1)) {
+    while (s21_is_less_or_equal(value_2, value_1)) {
         status = s21_sub(value_1, value_2, &value_1);
         status = s21_add(*div_result, one, div_result);
     } // целочисленное деление
 
     return status;
-}
+} // работает, но следует добавить какой-то ускоритель
+
+// Идея ускорителя в том, чтобы степенями двойки находить близкий результат
+// int div_acelerator(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
+//   s21_decimal two = {2, 0, 0, 0};
+
+//   while (s21_is_less_or_equal(value_2, value_1)) {
+//     s21_mul(value_2, two, &value_2);
+//   }
+// }
 
 int mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *mod_result) {
     int status = 0;
 
-    while (s21_is_less(value_2, value_1)) {
+    while (s21_is_less_or_equal(value_2, value_1)) {
         status = s21_sub(value_1, value_2, &value_1);
     } // поиск остатка от деления
 
@@ -154,7 +163,7 @@ int mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *mod_result) {
     }
 
     return status;
-}
+} // работает
 
 // Проверяет является ли число нулем
 // Если это ноль, то возвращает 1, иначе 0
@@ -170,6 +179,8 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
   memset(result, 0, sizeof(s21_decimal));
 
   int sign = get_sign(value);
+  int scale = get_scale(&value);
+  set_scale(result, scale);
 
   if (sign) {
     set_sign(result, 0);
@@ -326,14 +337,13 @@ int sub_bits(s21_decimal *a, s21_decimal *b, s21_decimal *result) {
     if (value_1 < (value_2 + credit)) {
       diff = (0x100000000 + value_1) - value_2 - credit;
       credit = 1;
-    } else if (value_1 > (value_2 + credit)) {
+    } else if (value_1 >= (value_2 + credit)) {
       diff = value_1 - value_2 - credit;
       credit = 0;
     }
 
     result->bits[i] = (int)(diff & 0xFFFFFFFF);
   }
-
   return credit;
 }
 
