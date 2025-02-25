@@ -6,9 +6,10 @@
 #include <math.h>
 #include <limits.h>
 
-typedef struct 
-{
-    unsigned int bits[4];
+#define SIGN_MASK 0x80000000
+
+typedef struct {
+  unsigned int bits[4];
 } s21_decimal;
 
 int get_sign(s21_decimal d);
@@ -24,17 +25,21 @@ int multiply_by_2(s21_decimal *num);
 int multiply_by_8(s21_decimal *num);
 int compare_bits(s21_decimal a, s21_decimal b);
 
+int div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result);
+int mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result);
+int is_zero(s21_decimal num);
+
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 
-int s21_is_less(s21_decimal, s21_decimal); // <
-int s21_is_less_or_equal(s21_decimal, s21_decimal); // <=
-int s21_is_greater(s21_decimal, s21_decimal); // >
-int s21_is_greater_or_equal(s21_decimal, s21_decimal); // >=
-int s21_is_equal(s21_decimal, s21_decimal); // ==
-int s21_is_not_equal(s21_decimal, s21_decimal); // !=
+int s21_is_less(s21_decimal, s21_decimal);              // <
+int s21_is_less_or_equal(s21_decimal, s21_decimal);     // <=
+int s21_is_greater(s21_decimal, s21_decimal);           // >
+int s21_is_greater_or_equal(s21_decimal, s21_decimal);  // >=
+int s21_is_equal(s21_decimal, s21_decimal);             // ==
+int s21_is_not_equal(s21_decimal, s21_decimal);         // !=
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst);
 int s21_from_float_to_decimal(float src, s21_decimal *dst);
