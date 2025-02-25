@@ -1,6 +1,4 @@
-// #include "test_runner.h"
-#include <check.h>
-#include "../s21_decimal.h"
+#include "test_runner.h"
 
 // Start tests for s21_from_decimal_to_int
 
@@ -13,8 +11,8 @@ START_TEST(test_from_decimal_to_int_normal) {
     s21_decimal src2 = {{0x00000000, 0x00000000, 1234, 0x80000000}};
 
 
-    error_code1 = s21_from_decimal_to_int(src1, dst1);
-    error_code2 = s21_from_decimal_to_int(src2, dst2);
+    error_code1 = s21_from_decimal_to_int(src1, &dst1);
+    error_code2 = s21_from_decimal_to_int(src2, &dst2);
 
     ck_assert_int_eq(dst1, expected_dst1);
     ck_assert_int_eq(error_code1, expected_error_code1);
@@ -32,8 +30,8 @@ START_TEST(test_from_decimal_to_int_zero) {
     s21_decimal src2 = {{0x00000000, 0x00000000, 0x00000000, 0x80000000}};
 
 
-    error_code1 = s21_from_decimal_to_int(src1, dst1);
-    error_code2 = s21_from_decimal_to_int(src2, dst2);
+    error_code1 = s21_from_decimal_to_int(src1, &dst1);
+    error_code2 = s21_from_decimal_to_int(src2, &dst2);
 
     ck_assert_int_eq(dst1, expected_dst);
     ck_assert_int_eq(error_code1, expected_error_code);
@@ -52,9 +50,9 @@ START_TEST(test_from_decimal_to_int_floating_point) {
     s21_decimal src3 = {{0x00000000, 0x00000000, 123456, 10 << 16}};
 
 
-    error_code1 = s21_from_decimal_to_int(src1, dst1);
-    error_code2 = s21_from_decimal_to_int(src2, dst2);
-    error_code3 = s21_from_decimal_to_int(src3, dst3);
+    error_code1 = s21_from_decimal_to_int(src1, &dst1);
+    error_code2 = s21_from_decimal_to_int(src2, &dst2);
+    error_code3 = s21_from_decimal_to_int(src3, &dst3);
 
     ck_assert_int_eq(dst1, expected_dst1);
     ck_assert_int_eq(error_code1, expected_error_code);
@@ -76,10 +74,10 @@ START_TEST(test_from_decimal_to_int_limit) {
     s21_decimal src4 = {{0x00000000, 10, 0x00000000, 0x80000000}};
 
 
-    error_code1 = s21_from_decimal_to_int(src1, dst1);
-    error_code2 = s21_from_decimal_to_int(src2, dst2);
-    error_code3 = s21_from_decimal_to_int(src3, dst3);
-    error_code4 = s21_from_decimal_to_int(src4, dst4);
+    error_code1 = s21_from_decimal_to_int(src1, &dst1);
+    error_code2 = s21_from_decimal_to_int(src2, &dst2);
+    error_code3 = s21_from_decimal_to_int(src3, &dst3);
+    error_code4 = s21_from_decimal_to_int(src4, &dst4);
 
     ck_assert_int_eq(dst1, expected_dst1);
     ck_assert_int_eq(error_code1, expected_error_code1);

@@ -63,7 +63,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int scale_2 = get_scale(&value_2);
 
     s21_decimal zero = {0};
-    s21_decimal one = {1, 0, 0, 0};
+    s21_decimal one = {{1, 0, 0, 0}};
     s21_decimal sub_result = value_2;
 
     if (sign2) {
@@ -95,8 +95,8 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     s21_decimal fract_result = {0}; // Хранит число после запятой 
     s21_decimal mod_result = {0}; // хранит остаток от деления
 
-    s21_decimal zero = {0};
-    s21_decimal ten = {10, 0, 0, 0};
+    // s21_decimal zero = {0};
+    s21_decimal ten = {{10, 0, 0, 0}};
 
     if (is_zero(value_2)) {
         status = 3;
@@ -132,7 +132,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 // Функция выполняет целочисленное деление
 int div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
     int status = 0;
-    s21_decimal one = {1, 0, 0, 0};
+    s21_decimal one = {{1, 0, 0, 0}};
 
     while (s21_is_less_or_equal(value_2, value_1)) {
         status = s21_sub(value_1, value_2, &value_1);
