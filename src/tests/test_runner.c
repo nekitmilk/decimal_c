@@ -12,6 +12,7 @@ static void run_tests(void) {
   int failed = 0;
   failed += run_test_suite(comparison_suite);
   failed += run_test_suite(convert_suite);
+  failed += run_test_suite(arithmetic_suite);
   //
   // тут делаем  failed += run_test_suite(название вашего suite)
   //

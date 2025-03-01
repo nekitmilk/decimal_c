@@ -9,12 +9,12 @@ void ck_assert_dec_eq (s21_decimal result, s21_decimal expected_result) {
 
 START_TEST(add_normal_1) {
     // Нормальная ситуация 123 + 17 = 140
-    s21_decimal value_1 = {0x7b, 0, 0, 0}; // 123
-    s21_decimal value_2 = {0x11, 0, 0, 0}; // 17
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0x7b, 0, 0, 0}}; // 123
+    s21_decimal value_2 = {{0x11, 0, 0, 0}}; // 17
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x8C, 0, 0, 0}; // 140
+    s21_decimal expected_1 = {{0x8C, 0, 0, 0}}; // 140
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -29,14 +29,14 @@ END_TEST
 
 START_TEST(add_normal_1_1) {
     // Нормальная ситуация 123 + 17 = 140
-    s21_decimal value_1 = {0x7b, 0, 0, 0}; // 123
+    s21_decimal value_1 = {{0x7b, 0, 0, 0}}; // 123
     set_sign(&value_1, 1);
+    s21_decimal value_2 = {{0x11, 0, 0, 0}}; // 17
     set_sign(&value_2, 1);
-    s21_decimal value_2 = {0x11, 0, 0, 0}; // 17
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x8C, 0, 0, 0}; // 140
+    s21_decimal expected_1 = {{0x8C, 0, 0, 0}}; // 140
     set_sign(&expected_1, 1);
     int expected_err = 0;
 
@@ -52,12 +52,12 @@ END_TEST
 
 START_TEST(add_normal_2) {
     // Нормальная ситуация 123 000.. + 17 000.. = 140 000..
-    s21_decimal value_1 = {0, 0x7b, 0, 0}; 
-    s21_decimal value_2 = {0, 0x11, 0, 0};
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0, 0x7b, 0, 0}}; 
+    s21_decimal value_2 = {{0, 0x11, 0, 0}};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0, 0x8C, 0, 0};
+    s21_decimal expected_1 = {{0, 0x8C, 0, 0}};
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -72,12 +72,12 @@ END_TEST
 
 START_TEST(add_normal_3) {
     // Нормальная ситуация 123 000.. + 17 000.. = 140 000..
-    s21_decimal value_1 = {0, 0, 0x7b, 0}; 
-    s21_decimal value_2 = {0, 0, 0x11, 0};
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0, 0, 0x7b, 0}}; 
+    s21_decimal value_2 = {{0, 0, 0x11, 0}};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0, 0, 0x8C, 0};
+    s21_decimal expected_1 = {{0, 0, 0x8C, 0}};
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -91,14 +91,14 @@ START_TEST(add_normal_3) {
 END_TEST
 
 START_TEST(add_normal_4) {
-    s21_decimal value_1 = {0x49A635DF, 0, 0, 0}; 
+    s21_decimal value_1 = {{0x49A635DF, 0, 0, 0}}; 
     set_scale(&value_1, 7);
-    s21_decimal value_2 = {0x2D8F5E21, 0, 0, 0};
+    s21_decimal value_2 = {{0x2D8F5E21, 0, 0, 0}};
     set_scale(&value_2, 7);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0xC8, 0, 0, 0};
+    s21_decimal expected_1 = {{0xC8, 0, 0, 0}};
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -112,14 +112,14 @@ START_TEST(add_normal_4) {
 END_TEST
 
 START_TEST(add_normal_5) {
-    s21_decimal value_1 = {0x9F84C2C7, 0x1589C8F, 0, 0}; // 96999532659,000007
+    s21_decimal value_1 = {{0x9F84C2C7, 0x1589C8F, 0, 0}}; // 96999532659,000007
     set_scale(&value_1, 6);
-    s21_decimal value_2 = {0x9665456A, 0x2A3D6270, 0x3, 0}; // 5838392938,0000056682
+    s21_decimal value_2 = {{0x9665456A, 0x2A3D6270, 0x3, 0}}; // 5838392938,0000056682
     set_scale(&value_2, 10);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x1678ECFF, 0xE45897C, 0, 0}; // 102 837 925 597,0000127
+    s21_decimal expected_1 = {{0x1678ECFF, 0xE45897C, 0, 0}}; // 102 837 925 597,0000127
     set_scale(&expected_1, 7);
     int expected_err = 0;
 
@@ -135,12 +135,12 @@ END_TEST
 
 START_TEST(add_transfering_1) {
     // Нормальная ситуация 123 000.. + 17 000.. = 140 000..
-    s21_decimal value_1 = {0xFFFFFFFF, 0, 0, 0}; // 4 294 967 295
-    s21_decimal value_2 = {0xD0FD5, 0, 0, 0}; // 856 021
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0, 0, 0}}; // 4 294 967 295
+    s21_decimal value_2 = {{0xD0FD5, 0, 0, 0}}; // 856 021
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x000D0FD4, 1, 0, 0}; // 4 295 823 316
+    s21_decimal expected_1 = {{0x000D0FD4, 1, 0, 0}}; // 4 295 823 316
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -155,12 +155,12 @@ END_TEST
 
 START_TEST(add_transfering_2) {
     // Нормальная ситуация 123 000.. + 17 000.. = 140 000..
-    s21_decimal value_1 = {0, 0xFFFFFFFF, 0, 0}; // 4 294 967 295
-    s21_decimal value_2 = {0, 0xD0FD5, 0, 0}; // 856 021
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 4 294 967 295
+    s21_decimal value_2 = {{0, 0xD0FD5, 0, 0}}; // 856 021
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0, 0x000D0FD4, 1, 0}; // 4 295 823 316
+    s21_decimal expected_1 = {{0, 0x000D0FD4, 1, 0}}; // 4 295 823 316
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -174,12 +174,12 @@ START_TEST(add_transfering_2) {
 END_TEST
 
 START_TEST(add_transfering_3) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0, 0, 0}; 
-    s21_decimal value_2 = {0x1, 0, 0, 0};
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0, 0, 0}}; 
+    s21_decimal value_2 = {{0x1, 0, 0, 0}};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0, 0xA, 0, 0};
+    s21_decimal expected_1 = {{0, 0xA, 0, 0}};
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -194,13 +194,13 @@ END_TEST
 
 START_TEST(add_diff_sign_1) {
     // Нормальная ситуация 123 + (-23) = 100
-    s21_decimal value_1 = {0x7b, 0, 0, 0}; // 123
-    s21_decimal value_2 = {0x17, 0, 0, 0}; // -23
+    s21_decimal value_1 = {{0x7b, 0, 0, 0}}; // 123
+    s21_decimal value_2 = {{0x17, 0, 0, 0}}; // -23
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x64, 0, 0, 0}; // 140
+    s21_decimal expected_1 = {{0x64, 0, 0, 0}}; // 140
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -214,13 +214,13 @@ START_TEST(add_diff_sign_1) {
 END_TEST
 
 START_TEST(add_diff_sign_2) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0xFFFFFFFF, 0, 0, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0xFFFFFFFF, 0, 0, 0}};
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x0, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+    s21_decimal expected_1 = {{0x0, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -234,13 +234,13 @@ START_TEST(add_diff_sign_2) {
 END_TEST
 
 START_TEST(add_diff_sign_3) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0xFFFFFFFF, 0, 0xFFFFFFFF, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0xFFFFFFFF, 0, 0xFFFFFFFF, 0}};
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x0, 0xFFFFFFFF, 0, 0};
+    s21_decimal expected_1 = {{0x0, 0xFFFFFFFF, 0, 0}};
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -254,13 +254,13 @@ START_TEST(add_diff_sign_3) {
 END_TEST
 
 START_TEST(add_diff_sign_4) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0xFFFFFFFF, 0, 0xFFFFFFFF, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0xFFFFFFFF, 0, 0xFFFFFFFF, 0}};
     set_sign(&value_1, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0x0, 0xFFFFFFFF, 0, 0};
+    s21_decimal expected_1 = {{0x0, 0xFFFFFFFF, 0, 0}};
     set_sign(&expected_1, 1);
     int expected_err = 0;
 
@@ -275,14 +275,14 @@ START_TEST(add_diff_sign_4) {
 END_TEST
 
 START_TEST(add_diff_sign_5) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0x6, 0, 0, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0x6, 0, 0, 0}};
     set_sign(&value_2, 1);
     set_scale(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0};
+    s21_decimal expected_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0}};
     set_sign(&expected_1, 1);
     int expected_err = 0;
 
@@ -297,14 +297,14 @@ START_TEST(add_diff_sign_5) {
 END_TEST
 
 START_TEST(add_diff_sign_6) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0x4, 0, 0, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0x4, 0, 0, 0}};
     set_sign(&value_2, 1);
     set_scale(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+    s21_decimal expected_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     set_sign(&expected_1, 1);
     int expected_err = 0;
 
@@ -319,14 +319,14 @@ START_TEST(add_diff_sign_6) {
 END_TEST
 
 START_TEST(add_diff_sign_7) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0x5, 0, 0, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0x5, 0, 0, 0}};
     set_sign(&value_2, 1);
     set_scale(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0};
+    s21_decimal expected_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0}};
     set_sign(&expected_1, 1);
     int expected_err = 0;
 
@@ -341,10 +341,10 @@ START_TEST(add_diff_sign_7) {
 END_TEST
 
 START_TEST(add_overflow_1) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0x1, 0, 0, 0};
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0x1, 0, 0, 0}};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
     int expected_err = 1;
 
@@ -357,10 +357,10 @@ START_TEST(add_overflow_1) {
 END_TEST
 
 START_TEST(add_overflow_2) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0, 0xFABFF, 0, 0};
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0, 0xFABFF, 0, 0}};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
     int expected_err = 1;
 
@@ -373,10 +373,10 @@ START_TEST(add_overflow_2) {
 END_TEST
 
 START_TEST(add_overflow_3) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
-    s21_decimal value_2 = {0, 0, 0xFABFF, 0};
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal value_2 = {{0, 0, 0xFABFF, 0}};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
     int expected_err = 1;
 
@@ -391,14 +391,14 @@ END_TEST
 // Большое число - ооочень маленькое, что должно быть?
 // Все, что не влезает в мантису должно быть округлено
 START_TEST(add_overflow_4) {
-    s21_decimal value_1 = {0, 0xFFFFFFFF, 0, 0}; // 18446744069414584320
-    s21_decimal value_2 = {0x1, 0, 0, 0}; // 1 * 10^-27
+    s21_decimal value_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584320
+    s21_decimal value_2 = {{0x1, 0, 0, 0}}; // 1 * 10^-27
     set_scale(&value_2, 27);
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0}; // 18446744069414584319,999...
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}}; // 18446744069414584319,999...
 
-    s21_decimal expected_1 = {0, 0xFFFFFFFF, 0, 0}; // 18446744069414584319,999...
+    s21_decimal expected_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584319,999...
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -411,14 +411,14 @@ START_TEST(add_overflow_4) {
 }
 END_TEST
 
-START_TEST(add_overflow_4) {
-    s21_decimal value_1 = {0, 0xFFFFFFFF, 0, 0}; // 18446744069414584320
-    s21_decimal value_2 = {0x1, 0, 0, 0}; // 1 * 10^-27
+START_TEST(add_overflow_5) {
+    s21_decimal value_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584320
+    s21_decimal value_2 = {{0x1, 0, 0, 0}}; // 1 * 10^-27
     set_scale(&value_2, 27);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0}; // 18446744069414584320 + 1 * 10^-27
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}}; // 18446744069414584320 + 1 * 10^-27
 
-    s21_decimal expected_1 = {0, 0xFFFFFFFF, 0, 0}; // 18446744069414584320
+    s21_decimal expected_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584320
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -432,12 +432,12 @@ START_TEST(add_overflow_4) {
 END_TEST
 
 START_TEST(add_overmin_1) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     set_sign(&value_1, 1);
-    s21_decimal value_2 = {0x1, 0, 0, 0};
+    s21_decimal value_2 = {{0x1, 0, 0, 0}};
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
     int expected_err = 2;
 
@@ -450,12 +450,12 @@ START_TEST(add_overmin_1) {
 END_TEST
 
 START_TEST(add_overmin_2) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     set_sign(&value_1, 1);
-    s21_decimal value_2 = {0xFFFFF, 0, 0, 0};
+    s21_decimal value_2 = {{0xFFFFF, 0, 0, 0}};
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
     int expected_err = 2;
 
@@ -468,12 +468,12 @@ START_TEST(add_overmin_2) {
 END_TEST
 
 START_TEST(add_overmin_3) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     set_sign(&value_1, 1);
-    s21_decimal value_2 = {0, 0xFABFFF, 0, 0};
+    s21_decimal value_2 = {{0, 0xFABFFF, 0, 0}};
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
     int expected_err = 2;
 
@@ -486,12 +486,12 @@ START_TEST(add_overmin_3) {
 END_TEST
 
 START_TEST(add_overmin_4) {
-    s21_decimal value_1 = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     set_sign(&value_1, 1);
-    s21_decimal value_2 = {0, 0xFABFFF, 0xFABFFF, 0};
+    s21_decimal value_2 = {{0, 0xFABFFF, 0xFABFFF, 0}};
     set_sign(&value_2, 1);
-    s21_decimal result_1 = {0};
-    s21_decimal result_2 = {0};
+    s21_decimal result_1 = {{0}};
+    s21_decimal result_2 = {{0}};
 
     int expected_err = 2;
 
@@ -505,7 +505,7 @@ END_TEST
 
 Suite *arithmetic_suite() {
   Suite *s;
-  TCase *tc_add_normal, tc_add_transfering, tc_add_diff_sign, tc_add_overflow, tc_add_overmin;
+  TCase *tc_add_normal, *tc_add_transfering, *tc_add_diff_sign, *tc_add_overflow, *tc_add_overmin;
 
   s = suite_create("add_tests");
 
@@ -539,6 +539,7 @@ Suite *arithmetic_suite() {
   tcase_add_test(tc_add_overflow, add_overflow_2);
   tcase_add_test(tc_add_overflow, add_overflow_3);
   tcase_add_test(tc_add_overflow, add_overflow_4);
+  tcase_add_test(tc_add_overflow, add_overflow_5);
   suite_add_tcase(s, tc_add_overflow);
 
   tc_add_overmin = tcase_create("test_add_overmin");
