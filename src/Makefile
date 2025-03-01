@@ -66,10 +66,7 @@ memory_check: clean $(TEST_EXEC)
 cppcheck:
 	@cppcheck --enable=all --suppress=missingIncludeSystem $(SRC_DIR)*.c $(TEST_DIR)/*.c
 
-show_coverage_info: 
-	@make clean 
-	@make gcov_report 
+show_coverage_info: clean gcov_report
 	@yandex-browser report/index.html
-	@make clean
 
 .PHONY: all clean test gcov_report format memory_check cppcheck show_coverage_info
