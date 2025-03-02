@@ -28,6 +28,7 @@ static int is_equal_compare(s21_decimal value_1, s21_decimal value_2,
                             types_of_comparison type);
 
 static void invert_result(int* result);
+static void reset_sign(s21_decimal* value);
 
 int s21_is_less(s21_decimal value_1, s21_decimal value_2) {
   int result = -1;
@@ -100,6 +101,12 @@ int s21_is_not_equal(s21_decimal value_1, s21_decimal value_2) {
 
 static int fast_sign_check(s21_decimal value_1, s21_decimal value_2,
                            types_of_comparison type, int* result) {
+  if (is_value_equal_zero(value_1)) {
+    reset_sign(&value_1);
+  }
+  if (is_value_equal_zero(value_2)) {
+    reset_sign(&value_2);
+  }
   int need_to_continue = 1;
   if (is_negative(value_1) && !is_negative(value_2)) {
     if (type == IS_LESS || type == IS_LESS_OR_EQUAL || type == IS_NOT_EQUAL) {
@@ -118,6 +125,8 @@ static int fast_sign_check(s21_decimal value_1, s21_decimal value_2,
                type == IS_NOT_EQUAL) {
       *result = 1;
       need_to_continue = 0;
+    }
+    if (is_value_equal_zero(value_1)) {
     }
   }
   return need_to_continue;
@@ -217,3 +226,5 @@ static void invert_result(int* result) {
     *result = 0;
   }
 }
+
+static void reset_sign(s21_decimal* value) { value->bits[3] &= ~SIGN_MASK; }

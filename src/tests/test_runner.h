@@ -10,6 +10,7 @@
 Suite *comparison_suite(void);
 Suite *convert_suite(void);
 Suite *arithmetic_suite(void);
+Suite* other_functions_suite(void);
 // сюда дописываем свои suite функции
 
 #endif
