@@ -22,4 +22,8 @@ void bankers_rounding(s21_decimal* value, unsigned int remainder);
 void round_up(s21_decimal* value);
 int is_next_mul_will_cause_an_overflow(s21_decimal value);
 // int get_scale(s21_decimal value);
+
+void tieshagr_bankers_rounding(s21_decimal *num, int target_scale);
+void tieshagr_bankers_rounding_v2(s21_decimal *num, int target_scale, int nechet);
+
 #endif

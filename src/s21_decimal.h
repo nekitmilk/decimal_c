@@ -17,7 +17,7 @@ void set_sign(s21_decimal *d, int sign);
 int get_scale(const s21_decimal *d);
 void set_scale(s21_decimal *d, int scale);
 
-void align_scales(s21_decimal *a, s21_decimal *b);
+int align_scales(s21_decimal *a, s21_decimal *b);
 int multiply_by_10(s21_decimal *num);
 int add_bits(s21_decimal *a, s21_decimal *b, s21_decimal *result);
 int sub_bits(s21_decimal *a, s21_decimal *b, s21_decimal *result);
