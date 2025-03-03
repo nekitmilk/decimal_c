@@ -509,6 +509,113 @@ START_TEST(add_overmin_4) {
 }
 END_TEST
 
+START_TEST(mantis_boundary_rounding_1) {
+    // Максимальное значение мантиссы: 79,228,162,514,264,337,593,543,950,335
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}}; // Максимальное значение
+    s21_decimal value_2 = {{0x1, 0, 0, 0x00010000}}; // 0.1 (scale = 1)
+    s21_decimal result = {{0}};
+
+    // Ожидаемый результат: 79,228,162,514,264,337,593,543,950,335 (округление вниз)
+    s21_decimal expected = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    int expected_err = 0;
+
+    int err = s21_add(value_1, value_2, &result);
+    ck_assert_dec_eq(result, expected);
+    ck_assert_int_eq(err, expected_err);
+}
+END_TEST
+
+START_TEST(mantis_boundary_rounding_2) {
+    // Максимальное значение мантиссы: 79,228,162,514,264,337,593,543,950,335
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}}; // Максимальное значение
+    s21_decimal value_2 = {{0x6, 0, 0, 0x80010000}}; // -0.6 (scale = 1)
+    s21_decimal result = {{0}};
+
+    // Ожидаемый результат: 79,228,162,514,264,337,593,543,950,334 (округление вниз)
+    s21_decimal expected = {{0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    int expected_err = 0;
+
+    int err = s21_add(value_1, value_2, &result);
+    ck_assert_dec_eq(result, expected);
+    ck_assert_int_eq(err, expected_err);
+}
+END_TEST
+
+START_TEST(mantis_boundary_rounding_3) {
+    // Максимальное значение мантиссы: 79,228,162,514,264,337,593,543,950,334
+    s21_decimal value_1 = {{0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0}}; // Максимальное значение - 1
+    s21_decimal value_2 = {{0x5, 0, 0, 0x00010000}}; // 0.5 (scale = 1)
+    s21_decimal result = {{0}};
+
+    // Ожидаемый результат: 79,228,162,514,264,337,593,543,950,334 (округление вниз, так как мантисса четная)
+    s21_decimal expected = {{0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    int expected_err = 0;
+
+    int err = s21_add(value_1, value_2, &result);
+    ck_assert_dec_eq(result, expected);
+    ck_assert_int_eq(err, expected_err);
+}
+END_TEST
+
+START_TEST(mantis_boundary_rounding_4) {
+    // Минимальное значение мантиссы: -79,228,162,514,264,337,593,543,950,335
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x80000000}}; // Минимальное значение
+    s21_decimal value_2 = {{0x6, 0, 0, 0x80010000}}; // -0.6 (scale = 1)
+    s21_decimal result = {{0}};
+
+    // Ожидаемый результат: -79,228,162,514,264,337,593,543,950,334 (округление вниз)
+    // s21_decimal expected = {{0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0x80000000}};
+    int expected_err = 2;
+
+    int err = s21_add(value_1, value_2, &result);
+    // ck_assert_dec_eq(result, expected);
+    ck_assert_int_eq(err, expected_err);
+}
+END_TEST
+
+START_TEST(mantis_boundary_rounding_5) {
+    // Максимальное значение мантиссы: 7,9,228,162,514,264,337,593,543,950,335
+    s21_decimal value_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x001C0000}}; // Максимальное значение, scale = 28
+    s21_decimal value_2 = {{0x6, 0, 0, 0x001C0000}}; // 0.0000000000000000000000000006 (scale = 28)
+    s21_decimal result = {{0}};
+
+    int expected_err = 1;
+
+    int err = s21_add(value_1, value_2, &result);
+    //ck_assert_dec_eq(result, expected);
+    ck_assert_int_eq(err, expected_err);
+}
+END_TEST
+
+START_TEST(mantis_boundary_rounding_6) {
+    // Обычное число: 123.45
+    s21_decimal value_1 = {{12345, 0, 0, 0x00020000}}; // 123.45 (scale = 2)
+    s21_decimal value_2 = {{6, 0, 0, 0x00180000}}; // 0.0000000000000000000000000006 (scale = 24)
+    s21_decimal result = {{0}};
+    s21_decimal expected = {{0xb0400006, 0xe8dfebfd, 0x00661d8d, 0x00180000}};
+    int expected_err = 0;
+
+    int err = s21_add(value_1, value_2, &result);
+    ck_assert_dec_eq(result, expected);
+    ck_assert_int_eq(err, expected_err);
+}
+END_TEST
+
+START_TEST(mantis_boundary_rounding_7) {
+    // Отрицательное обычное число: -123.45
+    s21_decimal value_1 = {{12345, 0, 0, 0x80020000}}; // -123.45 (scale = 2)
+    s21_decimal value_2 = {{6, 0, 0, 0x00180000}}; // 0.0000000000000000000000000006 (scale = 24)
+    s21_decimal result = {{0}};
+
+    s21_decimal expected = {{0xb03ffffa, 0xe8dfebfd, 0x00661d8d, 0x80180000}}; // -123.4499999999999999999999999994
+    int expected_err = 0;
+
+    int err = s21_add(value_1, value_2, &result);
+    ck_assert_dec_eq(result, expected);
+    ck_assert_int_eq(err, expected_err);
+}
+END_TEST
+
 // Здесь должен быть блок тестов на банковское округление
 // ОБЯЗАТЕЛЬНО тесты, в которых будет задействовано банк округл с двумя положительными числами
 
@@ -518,7 +625,7 @@ END_TEST
 
 Suite *arithmetic_suite() {
   Suite *s;
-  TCase *tc_add_normal, *tc_add_transfering, *tc_add_diff_sign, *tc_add_overflow, *tc_add_overmin;
+  TCase *tc_add_normal, *tc_add_transfering, *tc_add_diff_sign, *tc_add_overflow, *tc_add_overmin, *tc_mantis_boundary_rounding;
 
   s = suite_create("add_tests");
 
@@ -561,6 +668,16 @@ Suite *arithmetic_suite() {
   tcase_add_test(tc_add_overmin, add_overmin_3);
   tcase_add_test(tc_add_overmin, add_overmin_4);
   suite_add_tcase(s, tc_add_overmin);
+
+  tc_mantis_boundary_rounding = tcase_create("test_add_mantis_boundary_rounding");
+  tcase_add_test(tc_mantis_boundary_rounding, mantis_boundary_rounding_1);
+  tcase_add_test(tc_mantis_boundary_rounding, mantis_boundary_rounding_2);
+  tcase_add_test(tc_mantis_boundary_rounding, mantis_boundary_rounding_3);
+  tcase_add_test(tc_mantis_boundary_rounding, mantis_boundary_rounding_4);
+  tcase_add_test(tc_mantis_boundary_rounding, mantis_boundary_rounding_5);
+  tcase_add_test(tc_mantis_boundary_rounding, mantis_boundary_rounding_6);
+  tcase_add_test(tc_mantis_boundary_rounding, mantis_boundary_rounding_7);
+  suite_add_tcase(s, tc_mantis_boundary_rounding);
 
   return s;
 }
