@@ -193,6 +193,7 @@ void tieshagr_bankers_rounding_v2(s21_decimal *num, int target_scale, int nechet
     num->bits[1] = mantissa[1];
     num->bits[2] = mantissa[2];
     set_scale(num, target_scale);
+}
 
 int is_value_equal_zero(s21_decimal value) {
   return value.bits[0] == 0 && value.bits[1] == 0 && value.bits[2] == 0;
