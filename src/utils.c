@@ -105,6 +105,97 @@ void round_up(s21_decimal* value) {
   }
 }
 
+// у нечетных чисел последний бит 0
+// Банковское округление до определенного знака
+void tieshagr_bankers_rounding(s21_decimal *num, int target_scale) {
+    int current_scale = get_scale(num);
+    if (current_scale <= target_scale) return; // Округление не требуется
+
+    // Вычисляем разницу в масштабах
+    int scale_diff = current_scale - target_scale;
+
+    // Вычисляем 10^scale_diff
+    unsigned int divisor = 1;
+    for (int i = 0; i < scale_diff; i++) {
+        divisor *= 10;
+    }
+
+    // Получаем мантиссу
+    unsigned int mantissa[3] = {num->bits[0], num->bits[1], num->bits[2]};
+
+    // Вычисляем остаток
+    unsigned int remainder = 0;
+    for (int i = 2; i >= 0; i--) {
+        unsigned long temp = ((unsigned long)remainder << 32) | mantissa[i];
+        mantissa[i] = (unsigned int)(temp / divisor);
+        remainder = (unsigned int)(temp % divisor);
+    }
+
+    // Проверяем, нужно ли округлять
+    unsigned int half_divisor = divisor / 2;
+    if (remainder > half_divisor || (remainder == half_divisor && (mantissa[0] & 1))) {
+        // Округляем вверх
+        unsigned int carry = 1;
+        for (int i = 0; i < 3 && carry; i++) {
+            unsigned long sum = (unsigned long)mantissa[i] + carry;
+            mantissa[i] = (unsigned int)(sum & 0xFFFFFFFF);
+            carry = (unsigned int)(sum >> 32);
+        }
+    }
+
+    // Обновляем мантиссу и масштаб
+    num->bits[0] = mantissa[0];
+    num->bits[1] = mantissa[1];
+    num->bits[2] = mantissa[2];
+    set_scale(num, target_scale);
+}
+
+void tieshagr_bankers_rounding_v2(s21_decimal *num, int target_scale, int nechet) {
+    int current_scale = get_scale(num);
+    if (current_scale <= target_scale) return; // Округление не требуется
+
+    // Вычисляем разницу в масштабах
+    int scale_diff = current_scale - target_scale;
+
+    // Вычисляем 10^scale_diff
+    unsigned int divisor = 1;
+    for (int i = 0; i < scale_diff; i++) {
+        divisor *= 10;
+    }
+
+    // Получаем мантиссу
+    unsigned int mantissa[3] = {num->bits[0], num->bits[1], num->bits[2]};
+
+    // Вычисляем остаток
+    unsigned int remainder = 0;
+    for (int i = 2; i >= 0; i--) {
+        unsigned long temp = ((unsigned long)remainder << 32) | mantissa[i];
+        mantissa[i] = (unsigned int)(temp / divisor);
+        remainder = (unsigned int)(temp % divisor);
+    }
+
+    // Проверяем, нужно ли округлять
+    unsigned int half_divisor = divisor / 2;
+    // if (remainder > half_divisor || (remainder == half_divisor && (mantissa[0] & 1)) || nechet) {
+    if (remainder > half_divisor || ((remainder == half_divisor) && nechet)) {
+        // Округляем вверх
+        unsigned int carry = 1;
+        for (int i = 0; i < 3 && carry; i++) {
+            unsigned long sum = (unsigned long)mantissa[i] + carry;
+            mantissa[i] = (unsigned int)(sum & 0xFFFFFFFF);
+            carry = (unsigned int)(sum >> 32);
+        }
+    }
+    
+
+    // Обновляем мантиссу и масштаб
+    num->bits[0] = mantissa[0];
+    num->bits[1] = mantissa[1];
+    num->bits[2] = mantissa[2];
+    set_scale(num, target_scale);
+
 int is_value_equal_zero(s21_decimal value) {
   return value.bits[0] == 0 && value.bits[1] == 0 && value.bits[2] == 0;
+
+
 }

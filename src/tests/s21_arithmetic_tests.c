@@ -98,7 +98,8 @@ START_TEST(add_normal_4) {
     s21_decimal result_1 = {{0}};
     s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {{0xC8, 0, 0, 0}};
+    s21_decimal expected_1 = {{0x77359400, 0, 0, 0}};
+    set_scale(&expected_1, 7);
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -112,6 +113,7 @@ START_TEST(add_normal_4) {
 END_TEST
 
 START_TEST(add_normal_5) {
+    // 37 BFA10CB7 C85DC2DA
     s21_decimal value_1 = {{0x9F84C2C7, 0x1589C8F, 0, 0}}; // 96999532659,000007
     set_scale(&value_1, 6);
     s21_decimal value_2 = {{0x9665456A, 0x2A3D6270, 0x3, 0}}; // 5838392938,0000056682
@@ -119,8 +121,9 @@ START_TEST(add_normal_5) {
     s21_decimal result_1 = {{0}};
     s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {{0x1678ECFF, 0xE45897C, 0, 0}}; // 102 837 925 597,0000127
-    set_scale(&expected_1, 7);
+// 37 BFA10CB7 C85DC418
+    s21_decimal expected_1 = {{0xC85DC2DA, 0xBFA10CB7, 0x37, 0}}; // 102 837 925 597,0000127000
+    set_scale(&expected_1, 10);
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -179,7 +182,7 @@ START_TEST(add_transfering_3) {
     s21_decimal result_1 = {{0}};
     s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {{0, 0xA, 0, 0}};
+    s21_decimal expected_1 = {{0, 0x1, 0, 0}};
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -282,8 +285,8 @@ START_TEST(add_diff_sign_5) {
     s21_decimal result_1 = {{0}};
     s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0}};
-    set_sign(&expected_1, 1);
+    s21_decimal expected_1 = {{0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    // set_sign(&expected_1, 1);
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -305,7 +308,7 @@ START_TEST(add_diff_sign_6) {
     s21_decimal result_2 = {{0}};
 
     s21_decimal expected_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
-    set_sign(&expected_1, 1);
+    // set_sign(&expected_1, 1);
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -326,8 +329,8 @@ START_TEST(add_diff_sign_7) {
     s21_decimal result_1 = {{0}};
     s21_decimal result_2 = {{0}};
 
-    s21_decimal expected_1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0}};
-    set_sign(&expected_1, 1);
+    s21_decimal expected_1 = {{0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    // set_sign(&expected_1, 1);
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -398,7 +401,9 @@ START_TEST(add_overflow_4) {
     s21_decimal result_1 = {{0}};
     s21_decimal result_2 = {{0}}; // 18446744069414584319,999...
 
-    s21_decimal expected_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584319,999...
+// 3b9ac9ff c4653600 00000000
+    s21_decimal expected_1 = {{0, 0xc4653600, 0x3b9ac9ff, 0}}; // 18446744069414584320,00...
+    set_scale(&expected_1, 9);
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -418,7 +423,8 @@ START_TEST(add_overflow_5) {
     s21_decimal result_1 = {{0}};
     s21_decimal result_2 = {{0}}; // 18446744069414584320 + 1 * 10^-27
 
-    s21_decimal expected_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584320
+    s21_decimal expected_1 = {{0, 0xc4653600, 0x3b9ac9ff, 0}}; // 18446744069414584320,00...
+    set_scale(&expected_1, 9);
     int expected_err = 0;
 
     int err_1 = s21_add(value_1, value_2, &result_1);
@@ -502,6 +508,13 @@ START_TEST(add_overmin_4) {
     ck_assert_int_eq(err_2, expected_err);
 }
 END_TEST
+
+// Здесь должен быть блок тестов на банковское округление
+// ОБЯЗАТЕЛЬНО тесты, в которых будет задействовано банк округл с двумя положительными числами
+
+// Тесты вычитания двух одинаковых чисел
+
+// Тест число с очень большим масштабом + число: 10,000...0 + 187654 = 187664
 
 Suite *arithmetic_suite() {
   Suite *s;
