@@ -19,8 +19,11 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   {
     int result_scale = scale1 > scale2? get_scale(&value_2): get_scale(&value_1);
     scale1 > scale2 ? 
-      tieshagr_bankers_rounding_v2(&value_1, result_scale, value_1.bits[0] << 31 | 0) :
-      tieshagr_bankers_rounding_v2(&value_2, result_scale, value_2.bits[0] << 31 | 0);    
+      tieshagr_bankers_rounding_v2(&value_1, result_scale, value_2.bits[0] << 31 | 0) :
+      tieshagr_bankers_rounding_v2(&value_2, result_scale, value_1.bits[0] << 31 | 0);
+
+    // printf("%d\n", value_2.bits[0] << 31 | 0);
+    // printf("val2: %.8x %.8x %.8x %x", value_2.bits[2], value_2.bits[1], value_2.bits[0], value_2.bits[3]);    
   }
   int overflow = 0;
 
@@ -113,26 +116,31 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   // s21_decimal zero = {0};
   s21_decimal ten = {{10, 0, 0, 0}};
 
-  if (is_zero(value_2)) {
-    status = 3;
-  } else {
-    div(value_1, value_2,
-        &div_result);  // Сохранили в div_result целочисленное деление
-    mod(value_1, value_2,
-        &mod_result);  // Сохраняем в mod_result остаток от деления
+    if (is_zero(value_2)) {
+        status = 3;
+    }
+    else {
+        _div(value_1, value_2, &div_result); // Сохранили в div_result целочисленное деление
+        mod(value_1, value_2, &mod_result); // Сохраняем в mod_result остаток от деления
+        
+        int result_scale = 0;
 
-    int result_scale = 0;
+        while (!is_zero(mod_result) && result_scale < 28)
+        {
+            s21_decimal temp_div = {0};
+            result_scale += 1;
+            printf("res_scale: %d\n",result_scale);
 
-    while (!is_zero(mod_result) && result_scale < 28) {
-      s21_decimal temp_div = {0};
-      result_scale += 1;
-      printf("res_scale: %d\n", result_scale);
-
-      s21_mul(mod_result, ten, &mod_result);
-      div(mod_result, value_2, &temp_div);
-      mod(mod_result, value_2, &mod_result);
-      s21_mul(fract_result, ten, &fract_result);
-      s21_add(fract_result, temp_div, &fract_result);
+            s21_mul(mod_result, ten, &mod_result);
+            _div(mod_result, value_2, &temp_div);
+            mod(mod_result, value_2, &mod_result);
+            s21_mul(fract_result, ten, &fract_result);
+            s21_add(fract_result, temp_div, &fract_result);
+        }
+        
+        set_scale(&fract_result, result_scale);
+        s21_add(div_result, fract_result, result);
+        
     }
 
     set_scale(&fract_result, result_scale);
@@ -144,9 +152,9 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 // Добавить округление
 
 // Функция выполняет целочисленное деление
-int div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
-  int status = 0;
-  s21_decimal one = {{1, 0, 0, 0}};
+int _div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
+    int status = 0;
+    s21_decimal one = {{1, 0, 0, 0}};
 
   while (s21_is_less_or_equal(value_2, value_1)) {
     status = s21_sub(value_1, value_2, &value_1);

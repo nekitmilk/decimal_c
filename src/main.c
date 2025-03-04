@@ -10,22 +10,20 @@ void print_dec(s21_decimal d);
 // void tieshagr_bankers_rounding_v2(s21_decimal *num, int target_scale, int chet);
 
 int main(int argc, const char* argv[]) {
-    s21_decimal value_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584320
-    s21_decimal value_2 = {{0x1, 0, 0, 0}}; // 1 * 10^-27
-    set_scale(&value_2, 27);
-    set_sign(&value_2, 1);
-    s21_decimal result_1 = {{0}};
-    s21_decimal result_2 = {{0}}; // 18446744069414584319,999...
+    // 792281625.14264337593543950335
+    s21_decimal decimal1 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x140000}};
+    s21_decimal decimal2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x140000}};
+    s21_decimal result = {0};
+    // int code = s21_add(decimal1, decimal2, NULL);
 
-    s21_decimal expected_1 = {{0, 0xFFFFFFFF, 0, 0}}; // 18446744069414584319,999...
-    // set_sign(&expected_1, 1);
+    s21_decimal expected = {{12345, 0, 0, 0x801C0000}}; // -123.4499999999999999999999999994
     int expected_err = 0;
 
-    int err_1 = s21_add(value_1, value_2, &result_1);
+    int err_1 = s21_add(decimal1, decimal2, &result);
     printf("\n                 ");
-    print_dec(value_1);
+    print_dec(decimal1);
     printf("\n                 ");
-    print_dec(value_2);
+    print_dec(decimal2);
     printf("\nreal result:     ");
 
     // for (int i = 0; i < 8; i++)
@@ -33,25 +31,25 @@ int main(int argc, const char* argv[]) {
     //   div_by_10(&result_1);
     // }
     
-    print_dec(result_1);
+    print_dec(result);
     printf("\nerr code: %d\n", err_1);
     printf("\nexpected result: ");
-    print_dec(expected_1);
+    print_dec(expected);
 
-    s21_decimal bank = {{5, 0, 0, 0}};
-    printf("\n                 ");
-    // bank.bits[0] = 0xFFFFFFFF;
-    // bank.bits[1] = 0xFFFFFFFF;
-    // bank.bits[2] = 0xFFFFFFFF;
-    // 123 - 0,5 = 122
-    // 124 - 0,5 = 124
-    set_scale(&bank, 1);
-    set_sign(&bank, 1);
-    print_dec(bank);
-    tieshagr_bankers_rounding_v2(&bank, 0, 1);
+    // s21_decimal bank = {{5, 0, 0, 0}};
+    // printf("\n                 ");
+    // // bank.bits[0] = 0xFFFFFFFF;
+    // // bank.bits[1] = 0xFFFFFFFF;
+    // // bank.bits[2] = 0xFFFFFFFF;
+    // // 123 - 0,5 = 122
+    // // 124 - 0,5 = 124
+    // set_scale(&bank, 1);
+    // set_sign(&bank, 1);
+    // print_dec(bank);
+    // tieshagr_bankers_rounding_v2(&bank, 0, 1);
 
-    printf("\n                 ");
-    print_dec(bank);
+    // printf("\n                 ");
+    // print_dec(bank);
     
     
 //18446744069414584320,000000000
