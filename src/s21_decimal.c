@@ -71,52 +71,50 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   return status;
 }
 
-
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    int status = 0; 
+  int status = 0;
 
-    memset(result, 0, sizeof(s21_decimal));
-    int sign1 = get_sign(value_1);
-    int sign2 = get_sign(value_2);
+  memset(result, 0, sizeof(s21_decimal));
+  int sign1 = get_sign(value_1);
+  int sign2 = get_sign(value_2);
 
-    int scale_1 = get_scale(&value_1);
-    int scale_2 = get_scale(&value_2);
+  int scale_1 = get_scale(&value_1);
+  int scale_2 = get_scale(&value_2);
 
-    s21_decimal zero = {0};
-    s21_decimal one = {{1, 0, 0, 0}};
-    s21_decimal sub_result = value_2;
+  s21_decimal zero = {0};
+  s21_decimal one = {{1, 0, 0, 0}};
+  s21_decimal sub_result = value_2;
 
-    if (sign2) {
-        set_sign(&sub_result, 0);
-    }
-    set_scale(&sub_result, 0);
-    
-    while (compare_bits(sub_result, zero) != -1) {
-        s21_sub(sub_result, one, &sub_result);
-        status = s21_add(*result, value_1, result);
-    }
+  if (sign2) {
+    set_sign(&sub_result, 0);
+  }
+  set_scale(&sub_result, 0);
 
-    set_scale(result, scale_1 + scale_2);
-    if (sign1 > sign2) {
-        set_sign(result, sign1);
-    }
-    else {
-        set_sign(result, sign2);
-    }
+  while (compare_bits(sub_result, zero) != -1) {
+    s21_sub(sub_result, one, &sub_result);
+    status = s21_add(*result, value_1, result);
+  }
 
-    return status;
+  set_scale(result, scale_1 + scale_2);
+  if (sign1 > sign2) {
+    set_sign(result, sign1);
+  } else {
+    set_sign(result, sign2);
+  }
+
+  return status;
 }
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    int status = 0;
-    memset(result, 0, sizeof(s21_decimal));
+  int status = 0;
+  memset(result, 0, sizeof(s21_decimal));
 
-    s21_decimal div_result = {0}; // хранит целую часть
-    s21_decimal fract_result = {0}; // Хранит число после запятой 
-    s21_decimal mod_result = {0}; // хранит остаток от деления
+  s21_decimal div_result = {0};  // хранит целую часть
+  s21_decimal fract_result = {0};  // Хранит число после запятой
+  s21_decimal mod_result = {0};  // хранит остаток от деления
 
-    // s21_decimal zero = {0};
-    s21_decimal ten = {{10, 0, 0, 0}};
+  // s21_decimal zero = {0};
+  s21_decimal ten = {{10, 0, 0, 0}};
 
     if (is_zero(value_2)) {
         status = 3;
@@ -144,26 +142,31 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         s21_add(div_result, fract_result, result);
         
     }
-    
-    return status;
-} // Добавить обработку слишком больших или сликом малых чисел в результате
-// Добавить округление 
+
+    set_scale(&fract_result, result_scale);
+    s21_add(div_result, fract_result, result);
+  }
+
+  return status;
+}  // Добавить обработку слишком больших или сликом малых чисел в результате
+// Добавить округление
 
 // Функция выполняет целочисленное деление
 int _div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
     int status = 0;
     s21_decimal one = {{1, 0, 0, 0}};
 
-    while (s21_is_less_or_equal(value_2, value_1)) {
-        status = s21_sub(value_1, value_2, &value_1);
-        status = s21_add(*div_result, one, div_result);
-    } // целочисленное деление
+  while (s21_is_less_or_equal(value_2, value_1)) {
+    status = s21_sub(value_1, value_2, &value_1);
+    status = s21_add(*div_result, one, div_result);
+  }  // целочисленное деление
 
-    return status;
-} // работает, но следует добавить какой-то ускоритель
+  return status;
+}  // работает, но следует добавить какой-то ускоритель
 
 // Идея ускорителя в том, чтобы степенями двойки находить близкий результат
-// int div_acelerator(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
+// int div_acelerator(s21_decimal value_1, s21_decimal value_2, s21_decimal
+// *div_result) {
 //   s21_decimal two = {2, 0, 0, 0};
 
 //   while (s21_is_less_or_equal(value_2, value_1)) {
@@ -172,23 +175,23 @@ int _div(s21_decimal value_1, s21_decimal value_2, s21_decimal *div_result) {
 // }
 
 int mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *mod_result) {
-    int status = 0;
+  int status = 0;
 
-    while (s21_is_less_or_equal(value_2, value_1)) {
-        status = s21_sub(value_1, value_2, &value_1);
-    } // поиск остатка от деления
+  while (s21_is_less_or_equal(value_2, value_1)) {
+    status = s21_sub(value_1, value_2, &value_1);
+  }  // поиск остатка от деления
 
-    if (!status) {
-        *mod_result = value_1;
-    }
+  if (!status) {
+    *mod_result = value_1;
+  }
 
-    return status;
-} // работает
+  return status;
+}  // работает
 
 // Проверяет является ли число нулем
 // Если это ноль, то возвращает 1, иначе 0
 int is_zero(s21_decimal num) {
-    return (num.bits[0] == 0 && num.bits[1] == 0 && num.bits[2] == 0);
+  return (num.bits[0] == 0 && num.bits[1] == 0 && num.bits[2] == 0);
 }
 
 // Нужны тесты (Аня)
@@ -282,21 +285,21 @@ int multiply_by_10(s21_decimal *num) {
   s21_decimal temp2 = *num;
   s21_decimal temp8 = *num;
 
-    if (multiply_by_2(&temp2) != 0) {
-        status = 1;
-    }
-    
-    if (multiply_by_8(&temp8) != 0) {
-        status = 1;
-    }
+  if (multiply_by_2(&temp2) != 0) {
+    status = 1;
+  }
 
-    if (!status) {
-        add_bits(&temp2, &temp8, num);
-    }
+  if (multiply_by_8(&temp8) != 0) {
+    status = 1;
+  }
 
-    // Добавить установку масштаба - 1?
-    
-    return status;
+  if (!status) {
+    add_bits(&temp2, &temp8, num);
+  }
+
+  // Добавить установку масштаба - 1?
+
+  return status;
 }
 
 int multiply_by_2(s21_decimal *num) {
