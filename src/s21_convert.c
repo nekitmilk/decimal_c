@@ -1,6 +1,9 @@
 #include "s21_decimal.h"
 #include "s21_print_decimal.h"
 
+double get_mantissa(s21_decimal src);
+float decimal_to_float(s21_decimal src);
+
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   int error_code = 0;
   s21_decimal min, max;
@@ -9,16 +12,7 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   if (s21_is_greater(src, max) || s21_is_less(src, min)) {
     error_code = 1;
   } else {
-    /*
-    change for cases where bits[0] and bits[1] != 0
-    
-    option 1 --> use s21_round
     s21_floor(src, &src);
-    
-    option 2 --> use div (integer division)
-    
-    option 3 --> reinventing bicycle
-    */
     int sign = get_sign(src);
     *dst = src.bits[0] / (int)(pow(10, src.bits[3] >> 16 & 0x00FF));
     *dst *= (sign) ? -1 : 1;
@@ -57,17 +51,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     *dst = 0;
     error_code = 1;
   } else {
-    /*
-    I hope my next 10 hours of work not usless
-
-    s21_decimal whole, fractional;
-    get_whole(src, &whole);
-    get_fractional(src, &fractional);
-    *dst = build_whole_float(whole) + build_fractional_float(fractional) *
-            get_sign(src) ? -1 : 1;
-    */
-
-    *dst = (src.bits[2] / pow(10, src.bits[3] >> 16 & 0x00FF));
+    *dst = decimal_to_float(src);
   }
   return error_code;
 }
@@ -97,4 +81,19 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     }
   }
   return error_code;
+}
+
+double get_mantissa(s21_decimal src) {
+  double result = 0.0;
+  for (int i = 0; i < 3; i++) {
+      result += pow(2, 32 * i) * (double)src.bits[i];
+  }
+  return result;
+}
+
+float decimal_to_float(s21_decimal src) {
+  double mantissa = get_mantissa(src);
+  double value = (mantissa / pow(10, get_scale(&src)));
+  value = get_sign(src) ? -value : value;
+  return (float)value;
 }
