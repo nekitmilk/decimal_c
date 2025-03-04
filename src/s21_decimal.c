@@ -1,4 +1,5 @@
 #include "s21_decimal.h"
+#include "utils.h"
 // #include "s21_print_decimal.h"
 
 // 0 - OK; 1 - too big or infinity; 2 - too small or -infinity
@@ -9,9 +10,18 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int sign1 = get_sign(value_1);
   int sign2 = get_sign(value_2);
 
+  int scale1 = get_scale(&value_1);
+  int scale2 = get_scale(&value_2);
   // Выравнивание масштабов
-  align_scales(&value_1, &value_2);
+  int err_align = align_scales(&value_1, &value_2);
 
+  if (err_align)
+  {
+    int result_scale = scale1 > scale2? get_scale(&value_2): get_scale(&value_1);
+    scale1 > scale2 ? 
+      tieshagr_bankers_rounding_v2(&value_1, result_scale, value_1.bits[0] << 31 | 0) :
+      tieshagr_bankers_rounding_v2(&value_2, result_scale, value_2.bits[0] << 31 | 0);    
+  }
   int overflow = 0;
 
   // обработка, когда одно число положительное, другое отрицательное
@@ -29,7 +39,14 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   }
 
   if (overflow) {
-    status = overflow;
+    if (get_sign(*result)) {
+      status = 2;
+    }
+    else {
+      status = 1;
+    }
+    
+    // status = overflow;
     memset(result, 0, sizeof(s21_decimal));
   } else {
     // Установка общего масштаба и знака
@@ -214,22 +231,39 @@ void set_scale(s21_decimal *d, int scale) {
 
 // Выравнивает запятую в обоих числах
 // Могут быть проблемы с потерей точности, нужно ли с этим что-то делать?
-void align_scales(s21_decimal *a, s21_decimal *b) {
+// Очень нужно что-то с этим сделать
+// Функция старается максимально выровнять масштаб
+// Если у нее не получается до конца это сделать, то она останавливается и возвращает 1
+// добавленный масштаб
+int align_scales(s21_decimal *a, s21_decimal *b) {
   int scale_a = get_scale(a);
   int scale_b = get_scale(b);
 
-  while (scale_a < scale_b) {
-    multiply_by_10(a);
-    scale_a++;
+  int status = 0;
+
+  while (scale_a < scale_b && !status) {
+    s21_decimal temp = *a;
+    status = multiply_by_10(&temp);
+    if (!status) {
+      *a = temp;
+      scale_a++;
+    }
+    
   }
 
-  while (scale_b < scale_a) {
-    multiply_by_10(b);
-    scale_b++;
+  while (scale_b < scale_a && !status) {
+    s21_decimal temp = *b;
+    status = multiply_by_10(&temp);
+    if (!status) {
+      *b = temp;
+      scale_b++;
+    }
   }
 
   set_scale(a, scale_a);
   set_scale(b, scale_b);
+
+  return status;
 }
 
 // В чем идея? Чтобы побитово умножить число на 10, нам нужно сначала
