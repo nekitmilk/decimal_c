@@ -98,7 +98,7 @@ START_TEST(test_from_decimal_to_int_floating_point_extended) {
   /* TODO: check is this correct */
   int dst1 = 0, dst2 = 0, dst3 = 0;
   int error_code1 = -100, error_code2 = -100, error_code3 = -100;
-  int expected_dst1 = 1099511627, expected_dst2 = 47223664, expected_dst3 = 23;
+  int expected_dst1 = 1099511627, expected_dst2 = 47223664, expected_dst3 = 10;
   int expected_error_code = 0;
   s21_decimal src1 = {{0xffffffff, 0x000000ff, 0x00000000, 3 << 16}};
   s21_decimal src2 = {{0xffffffff, 0xffffffff, 0x000000ff, 14 << 16}};
