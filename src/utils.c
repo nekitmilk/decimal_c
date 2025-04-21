@@ -1,70 +1,36 @@
 #include "utils.h"
 
-void equalize_scales(s21_decimal* value_1, s21_decimal* value_2) {
-  int scale_1 = get_scale(value_1);
-  int scale_2 = get_scale(value_2);
+static void equalize(s21_decimal *value_with_smaller_scale,
+                     s21_decimal *value_with_larger_scale);
 
-  if (scale_1 < scale_2) {
-    equalize(value_1, value_2, scale_1, scale_2);
-  } else if (scale_2 < scale_1) {
-    equalize(value_2, value_1, scale_2, scale_1);
+void equalize_scales(s21_decimal *value_1, s21_decimal *value_2) {
+  if (get_scale(value_1) < get_scale(value_2)) {
+    equalize(value_1, value_2);
+  } else if (get_scale(value_2) < get_scale(value_1)) {
+    equalize(value_2, value_1);
   }
 }
 
-void equalize(s21_decimal* value_with_smaller_scale,
-              s21_decimal* value_with_larger_scale, int smaller_scale,
-              int larger_scale) {
+static void equalize(s21_decimal *value_with_smaller_scale,
+                     s21_decimal *value_with_larger_scale) {
+  int smaller_scale = get_scale(value_with_smaller_scale);
+  int larger_scale = get_scale(value_with_larger_scale);
+
   while ((smaller_scale != larger_scale) &&
          !is_next_mul_will_cause_an_overflow(*value_with_smaller_scale)) {
-    mul_by_10(value_with_smaller_scale);
+    multiply_by_10(value_with_smaller_scale);
     ++smaller_scale;
+    set_scale(value_with_smaller_scale, smaller_scale);
   }
 
   while (smaller_scale != larger_scale) {
-    div_by_10(value_with_larger_scale, bankers_rounding);
+    int remainder = div_by_10(value_with_larger_scale);
     --larger_scale;
+    bankers_rounding(value_with_larger_scale, remainder, smaller_scale);
   }
 }
 
-int mul_by_10(s21_decimal* value) {
-  int is_value_overflowed = 0;
-  unsigned long long temp = 0;
-  unsigned int carry = 0;
-  s21_decimal res;
-
-  temp = (unsigned long long)value->bits[0] * 10;
-  res.bits[0] = (unsigned int)(temp & 0xFFFFFFFF);  // применяем маску, чтобы
-                                                    // извлечь младшие 32 бита
-  carry = (unsigned int)(temp >> 32);
-
-  temp = (unsigned long long)value->bits[1] * 10 + carry;
-  res.bits[1] = (unsigned int)(temp & 0xFFFFFFFF);
-  carry = (unsigned int)(temp >> 32);
-
-  temp = (unsigned long long)value->bits[2] * 10 + carry;
-  res.bits[2] = (unsigned int)(temp & 0xFFFFFFFF);
-  carry = (unsigned int)(temp >> 32);
-
-  if (carry != 0) {
-    is_value_overflowed = 1;
-    printf("OVERFLOW!\n");
-  }
-
-  res.bits[3] = value->bits[3];
-
-  *value = res;
-  set_scale(value, get_scale(value) + 1);
-  return is_value_overflowed;
-}
-
-int is_next_mul_will_cause_an_overflow(s21_decimal value) {
-  return value.bits[2] >= 0x19999999;
-
-  // return mul_by_10(&value);
-}
-
-void div_by_10(s21_decimal* value,
-               void (*rounding_function)(s21_decimal*, unsigned int)) {
+int div_by_10(s21_decimal *value) {
   s21_decimal temp_result = {{0, 0, 0, 0}};
   unsigned int remainder = 0;
 
@@ -74,16 +40,17 @@ void div_by_10(s21_decimal* value,
     temp_result.bits[i] = (unsigned int)(current / 10);
     remainder = (unsigned int)(current % 10);
   }
-  // bankers_rounding(&temp_result, remainder);
-  int scale = get_scale(value);
-  if (scale > 0) --scale;
+
+  int scale = get_scale(value) - 1;
   temp_result.bits[3] = (value->bits[3] & SIGN_MASK) | scale << 16;
-  rounding_function(&temp_result, remainder);
   *value = temp_result;
+
+  return remainder;
 }
 
-void bankers_rounding(s21_decimal* value, unsigned int remainder) {
-  if (get_scale(value) == 0) {
+void bankers_rounding(s21_decimal *value, unsigned int remainder,
+                      int target_scale) {
+  if (get_scale(value) == target_scale) {
     if (remainder > 5) {
       round_up(value);
 
@@ -96,7 +63,7 @@ void bankers_rounding(s21_decimal* value, unsigned int remainder) {
   }
 }
 
-void round_up(s21_decimal* value) {
+void round_up(s21_decimal *value) {
   for (int i = 0, need_to_continue = 1; i < 3 && need_to_continue; ++i) {
     ++value->bits[i];
     if (value->bits[i] != 0) {
@@ -105,98 +72,185 @@ void round_up(s21_decimal* value) {
   }
 }
 
-// у нечетных чисел последний бит 0
-// Банковское округление до определенного знака
-void tieshagr_bankers_rounding(s21_decimal *num, int target_scale) {
-    int current_scale = get_scale(num);
-    if (current_scale <= target_scale) return; // Округление не требуется
-
-    // Вычисляем разницу в масштабах
-    int scale_diff = current_scale - target_scale;
-
-    // Вычисляем 10^scale_diff
-    unsigned int divisor = 1;
-    for (int i = 0; i < scale_diff; i++) {
-        divisor *= 10;
-    }
-
-    // Получаем мантиссу
-    unsigned int mantissa[3] = {num->bits[0], num->bits[1], num->bits[2]};
-
-    // Вычисляем остаток
-    unsigned int remainder = 0;
-    for (int i = 2; i >= 0; i--) {
-        unsigned long temp = ((unsigned long)remainder << 32) | mantissa[i];
-        mantissa[i] = (unsigned int)(temp / divisor);
-        remainder = (unsigned int)(temp % divisor);
-    }
-
-    // Проверяем, нужно ли округлять
-    unsigned int half_divisor = divisor / 2;
-    if (remainder > half_divisor || (remainder == half_divisor && (mantissa[0] & 1))) {
-        // Округляем вверх
-        unsigned int carry = 1;
-        for (int i = 0; i < 3 && carry; i++) {
-            unsigned long sum = (unsigned long)mantissa[i] + carry;
-            mantissa[i] = (unsigned int)(sum & 0xFFFFFFFF);
-            carry = (unsigned int)(sum >> 32);
-        }
-    }
-
-    // Обновляем мантиссу и масштаб
-    num->bits[0] = mantissa[0];
-    num->bits[1] = mantissa[1];
-    num->bits[2] = mantissa[2];
-    set_scale(num, target_scale);
-}
-
-void tieshagr_bankers_rounding_v2(s21_decimal *num, int target_scale, int nechet) {
-    int current_scale = get_scale(num);
-    if (current_scale <= target_scale) return; // Округление не требуется
-
-    // Вычисляем разницу в масштабах
-    int scale_diff = current_scale - target_scale;
-
-    // Вычисляем 10^scale_diff
-    unsigned int divisor = 1;
-    for (int i = 0; i < scale_diff; i++) {
-        divisor *= 10;
-    }
-
-    // Получаем мантиссу
-    unsigned int mantissa[3] = {num->bits[0], num->bits[1], num->bits[2]};
-
-    // Вычисляем остаток
-    unsigned int remainder = 0;
-    for (int i = 2; i >= 0; i--) {
-        unsigned long temp = ((unsigned long)remainder << 32) | mantissa[i];
-        mantissa[i] = (unsigned int)(temp / divisor);
-        remainder = (unsigned int)(temp % divisor);
-    }
-
-    // Проверяем, нужно ли округлять
-    unsigned int half_divisor = divisor / 2;
-    // if (remainder > half_divisor || (remainder == half_divisor && (mantissa[0] & 1)) || nechet) {
-    if (remainder > half_divisor || ((remainder == half_divisor) && nechet)) {
-        // Округляем вверх
-        unsigned int carry = 1;
-        for (int i = 0; i < 3 && carry; i++) {
-            unsigned long sum = (unsigned long)mantissa[i] + carry;
-            mantissa[i] = (unsigned int)(sum & 0xFFFFFFFF);
-            carry = (unsigned int)(sum >> 32);
-        }
-    }
-    
-
-    // Обновляем мантиссу и масштаб
-    num->bits[0] = mantissa[0];
-    num->bits[1] = mantissa[1];
-    num->bits[2] = mantissa[2];
-    set_scale(num, target_scale);
-}
-
 int is_value_equal_zero(s21_decimal value) {
   return value.bits[0] == 0 && value.bits[1] == 0 && value.bits[2] == 0;
+}
 
+int check_decimal(const s21_decimal *value) {
+  int status = 0;
 
+  if (is_invalid_scale(*value)) {
+    status = 1;
+  } else if (is_invalid_bits_set(*value)) {
+    status = 1;
+  }
+
+  return status;
+}
+
+int check_input_decimals(s21_decimal value_1, s21_decimal value_2,
+                         const s21_decimal *result) {
+  int status = 0;
+
+  if (result == NULL || check_decimal(&value_1) || check_decimal(&value_2)) {
+    status = 1;
+  }
+
+  return status;
+}
+
+s21_decimal get_zero_dec() {
+  s21_decimal zero = {0};
+  return zero;
+}
+
+int is_next_mul_will_cause_an_overflow(s21_decimal value) {
+  return value.bits[2] >= 0x19999999;
+}
+
+int is_invalid_bits_set(s21_decimal value) {
+  return (value.bits[3] & 0x7F00FFFF) != 0;
+}
+
+int is_invalid_scale(s21_decimal value) { return (get_scale(&value) > 28); }
+
+int get_sign(s21_decimal d) { return (d.bits[3] >> 31) & 1; }
+
+void set_sign(s21_decimal *d, int sign) {
+  d->bits[3] &= ~(1U << 31);
+  d->bits[3] |= (sign & 1U) << 31;
+}
+
+int get_scale(const s21_decimal *d) { return (d->bits[3] >> 16) & 0xFF; }
+
+void set_scale(s21_decimal *d, int scale) {
+  d->bits[3] &= ~(0xFF << 16);
+  d->bits[3] |= (scale & 0xFF) << 16;
+}
+
+int multiply_by_10(s21_decimal *num) {
+  int status = 0;
+
+  s21_decimal temp2 = *num;
+  s21_decimal temp8 = *num;
+
+  if (multiply_by_2(&temp2) != 0) {
+    status = 1;
+  }
+
+  if (multiply_by_8(&temp8) != 0) {
+    status = 1;
+  }
+
+  if (!status) {
+    add_bits(&temp2, &temp8, num);
+  }
+
+  return status;
+}
+
+int multiply_by_2(s21_decimal *num) {
+  int status = 0;
+
+  int in_my_mind = 0;
+  if (num->bits[0] & 0x80000000) {
+    in_my_mind = 1;
+  }
+
+  num->bits[0] <<= 1;
+
+  for (int i = 1; i < 3; i++) {
+    if (in_my_mind) {
+      in_my_mind = 0;
+      if (num->bits[i] & 0x80000000) {
+        in_my_mind = 1;
+      }
+      num->bits[i] <<= 1;
+      num->bits[i] |= 1;
+    } else {
+      if (num->bits[i] & 0x80000000) {
+        in_my_mind = 1;
+      }
+      num->bits[i] <<= 1;
+    }
+  }
+
+  status = in_my_mind;
+
+  return status;
+}
+
+int multiply_by_8(s21_decimal *num) {
+  int status = 0;
+  for (int i = 0; i < 3; i++) {
+    status = multiply_by_2(num);
+  }
+  return status;
+}
+
+int add_bits(s21_decimal *a, s21_decimal *b, s21_decimal *result) {
+  int status = 0;
+
+  int in_my_mind = 0;
+
+  for (int i = 0; i < 3; i++) {
+    unsigned long long part_sum = (unsigned long long)a->bits[i] +
+                                  (unsigned long long)b->bits[i] +
+                                  (unsigned long long)in_my_mind;
+    result->bits[i] = (int)(part_sum & 0xFFFFFFFF);
+    in_my_mind = (int)(part_sum >> 32);
+  }
+
+  if (in_my_mind != 0) {
+    status = 1;
+  }
+
+  return status;
+}
+
+void convert_decimal_to_int256(s21_decimal dec, s21_int256 *int256) {
+  int256->bits[0] = dec.bits[0];
+  int256->bits[1] = dec.bits[1];
+  int256->bits[2] = dec.bits[2];
+  int256->bits[3] = 0;
+  int256->bits[4] = 0;
+  int256->bits[5] = 0;
+  int256->bits[6] = 0;
+  int256->bits[7] = dec.bits[3];
+}
+
+int convert_int256_to_decimal(s21_int256 int256, s21_decimal *dec) {
+  int status = 0;
+
+  int scale_int256 = get_scale_int256(&int256);
+  s21_int256 temp = int256;
+
+  if (temp.bits[3] || temp.bits[4] || temp.bits[5] || temp.bits[6] ||
+      scale_int256 > 28) {
+    int stop_rounding = 0;
+    while (scale_int256 > 0 && !stop_rounding) {
+      tieshagr_bankers_rounding_int256(&temp, scale_int256 - 1);
+      if (temp.bits[3] || temp.bits[4] || temp.bits[5] || temp.bits[6] ||
+          scale_int256 > 29) {
+        temp = int256;
+        scale_int256--;
+      } else {
+        stop_rounding = 1;
+      }
+    }
+    if (temp.bits[3] || temp.bits[4] || temp.bits[5] || temp.bits[6]) {
+      status = 1;
+    }
+  }
+
+  if (!status) {
+    dec->bits[0] = temp.bits[0];
+    dec->bits[1] = temp.bits[1];
+    dec->bits[2] = temp.bits[2];
+    dec->bits[3] = temp.bits[7];
+    if (is_value_equal_zero(*dec) && !equal_zero_int256(int256)) {
+      status = 2;
+    }
+  }
+  return status;
 }

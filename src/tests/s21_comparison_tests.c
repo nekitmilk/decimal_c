@@ -1,27 +1,35 @@
 #include "test_runner.h"
+
 #define ASSERT ck_assert_uint_eq(expected_result, result);
+
 #define ADD_TEST_IS_LESS(testname) tcase_add_test(tc_is_less, testname)
+
 #define ADD_TEST_IS_LESS_OR_EQUAL(testname) \
   tcase_add_test(tc_is_less_or_equal, testname)
+
 #define ADD_TEST_IS_GREATER(testname) tcase_add_test(tc_is_greater, testname)
+
 #define ADD_TEST_IS_GREATER_OR_EQUAL(testname) \
   tcase_add_test(tc_is_greater_or_equal, testname)
+
 #define ADD_TEST_EDGE_CASES(testname) tcase_add_test(tc_edge_cases, testname)
+
 #define ADD_TEST_IS_EQUAL(testname) tcase_add_test(tc_is_equal, testname)
+
 #define ADD_TEST_IS_NOT_EQUAL(testname) \
   tcase_add_test(tc_is_not_equal, testname)
 
 // IS LESS
 START_TEST(test_is_less_both_positive_no_scales) {
-  // val 1 = 12345678987654321 == 0x2BDC546291F4B1.
   s21_decimal value_1;
-  value_1.bits[2] = 0x00000000;  // старшие 32 бита
-  value_1.bits[1] = 0x002BDC54;  // средние 32 бита
-  value_1.bits[0] = 0x6291F4B1;  // младшие 32 бита
+  // 12345678987654321
+  value_1.bits[2] = 0x00000000;
+  value_1.bits[1] = 0x002BDC54;
+  value_1.bits[0] = 0x6291F4B1;
 
-  value_1.bits[3] = 0x00000000;  // нет ни показателя степени, ни знака
+  value_1.bits[3] = 0x00000000;
 
-  // val 2 = 12345678912345678 == 0x2BDC545E14D64E
+  // 12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
 
   int expected_result = 0;
@@ -32,13 +40,13 @@ END_TEST
 
 START_TEST(test_is_less_one_negative_no_scales) {
   s21_decimal value_1;
-  // число -12345678987654321
+  // -12345678987654321
   value_1.bits[2] = 0x00000000;  // старшие 32 бита
   value_1.bits[1] = 0x002BDC54;  // средние 32 бита
   value_1.bits[0] = 0x6291F4B1;  // младшие 32 бита
   value_1.bits[3] = SIGN_MASK;   // отрицательное число
 
-  // число 12345678912345678
+  // 12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
 
   int expected_result = 1;
@@ -99,13 +107,13 @@ END_TEST
 
 START_TEST(test_is_less_both_negative) {
   s21_decimal value_1;
-  // число -12345678987654321
-  value_1.bits[2] = 0x00000000;  // старшие 32 бита
-  value_1.bits[1] = 0x002BDC54;  // средние 32 бита
-  value_1.bits[0] = 0x6291F4B1;  // младшие 32 бита
-  value_1.bits[3] = SIGN_MASK;   // отрицательное число
+  // -12345678987654321
+  value_1.bits[2] = 0x00000000;
+  value_1.bits[1] = 0x002BDC54;
+  value_1.bits[0] = 0x6291F4B1;
+  value_1.bits[3] = SIGN_MASK;
 
-  // число -12345678912345678
+  //  -12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, SIGN_MASK}};
 
   int expected_result = 1;
@@ -133,14 +141,14 @@ START_TEST(test_is_less_both_equal_integers) {
 END_TEST
 
 START_TEST(test_is_less_both_positive_and_one_number_has_scale) {
-  // val 1 = 123456789876.54321
+  // 123456789876.54321
   s21_decimal value_1;
-  value_1.bits[2] = 0x00000000;  // старшие 32 бита
-  value_1.bits[1] = 0x002BDC54;  // средние 32 бита
-  value_1.bits[0] = 0x6291F4B1;  // младшие 32 бита
-  value_1.bits[3] = 5 << 16;     // 5 знаков после запятой
+  value_1.bits[2] = 0x00000000;
+  value_1.bits[1] = 0x002BDC54;
+  value_1.bits[0] = 0x6291F4B1;
+  value_1.bits[3] = 5 << 16;
 
-  // val 2 = 12345678912345678
+  // 12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
 
   int expected_result = 1;
@@ -154,10 +162,10 @@ START_TEST(test_is_less_both_positive_and_one_number_has_scale) {
 END_TEST
 
 START_TEST(test_is_less_both_equal_but_one_of_them_with_a_scale) {
-  // val 2 = 123456789123.45678
+  // 123456789123.45678
   s21_decimal value_1 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 9 << 16}};
 
-  // val 2 = 12345678912345678
+  // 12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
 
   int expected_result = 1;
@@ -172,10 +180,10 @@ END_TEST
 
 START_TEST(
     test_is_less_both_equal_but_one_of_them_with_a_scale_and_other_one_is_negative) {
-  // val 2 = 123456789123.45678
+  // 123456789123.45678
   s21_decimal value_1 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 9 << 16}};
 
-  // val 2 = 12345678912345678
+  // 12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, SIGN_MASK}};
 
   int expected_result = 0;
@@ -189,10 +197,10 @@ START_TEST(
 END_TEST
 
 START_TEST(test_is_less_with_two_values_with_scale) {
-  //  1234567.89 == 75BCD15, scale = 2
+  //  1234567.89
   s21_decimal value_1 = {{0, 0, 0x075BCD15, 2 << 16}};
 
-  // 1234567.9 == BC614F, scale = 1
+  // 1234567.9
   s21_decimal value_2 = {{0, 0, 0x00BC614F, 1 << 16}};
 
   int expected_result = 1;
@@ -250,13 +258,13 @@ END_TEST
 
 START_TEST(test_is_less_or_equal_one_negative) {
   s21_decimal value_1;
-  // число -12345678987654321
-  value_1.bits[2] = 0x00000000;  // старшие 32 бита
-  value_1.bits[1] = 0x002BDC54;  // средние 32 бита
-  value_1.bits[0] = 0x6291F4B1;  // младшие 32 бита
-  value_1.bits[3] = SIGN_MASK;   // отрицательное число
+  // -12345678987654321
+  value_1.bits[2] = 0x00000000;
+  value_1.bits[1] = 0x002BDC54;
+  value_1.bits[0] = 0x6291F4B1;
+  value_1.bits[3] = SIGN_MASK;
 
-  // число 12345678912345678
+  // 12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
 
   int expected_result = 1;
@@ -285,10 +293,10 @@ START_TEST(test_is_greater_both_positive) {
 END_TEST
 
 START_TEST(test_is_greater_one_negative) {
-  // число -12345678987654321
+  // -12345678987654321
   s21_decimal value_1 = {{0x6291F4B1, 0x002BDC54, 0x00000000, SIGN_MASK}};
 
-  // число 12345678912345678
+  // 12345678912345678
   s21_decimal value_2 = {{0x5E14D64E, 0x002BDC54, 0x00000000, 0x00000000}};
 
   int expected_result = 0;

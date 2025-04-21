@@ -12,6 +12,13 @@ typedef enum {
   IS_NOT_EQUAL
 } types_of_comparison;
 
+static int compare(s21_decimal value_1, s21_decimal value_2, int type);
+
+static int non_valid_input(s21_decimal value_1, s21_decimal value_2);
+
+static int fast_sign_check(s21_decimal value_1, s21_decimal value_2,
+                           types_of_comparison type, int* result);
+
 static int compare_values(s21_decimal value_1, s21_decimal value_2,
                           types_of_comparison type);
 
@@ -21,9 +28,6 @@ static int is_less_compare(s21_decimal value_1, s21_decimal value_2,
 static int is_greater_compare(s21_decimal value_1, s21_decimal value_2,
                               types_of_comparison type);
 
-static int fast_sign_check(s21_decimal value_1, s21_decimal value_2,
-                           types_of_comparison type, int* result);
-
 static int is_equal_compare(s21_decimal value_1, s21_decimal value_2,
                             types_of_comparison type);
 
@@ -31,70 +35,39 @@ static void invert_result(int* result);
 static void reset_sign(s21_decimal* value);
 
 int s21_is_less(s21_decimal value_1, s21_decimal value_2) {
-  int result = -1;
-  int need_to_continue = fast_sign_check(value_1, value_2, IS_LESS, &result);
-
-  if (need_to_continue) {
-    equalize_scales(&value_1, &value_2);
-    result = compare_values(value_1, value_2, IS_LESS);
-  }
-
-  return result;
+  return compare(value_1, value_2, IS_LESS);
 }
 
 int s21_is_less_or_equal(s21_decimal value_1, s21_decimal value_2) {
-  int result = -1;
-  int need_to_continue =
-      fast_sign_check(value_1, value_2, IS_LESS_OR_EQUAL, &result);
-
-  if (need_to_continue) {
-    equalize_scales(&value_1, &value_2);
-    result = compare_values(value_1, value_2, IS_LESS_OR_EQUAL);
-  }
-  return result;
+  return compare(value_1, value_2, IS_LESS_OR_EQUAL);
 }
 
 int s21_is_greater(s21_decimal value_1, s21_decimal value_2) {
-  int result = -1;
-  int need_to_continue = fast_sign_check(value_1, value_2, IS_GREATER, &result);
-
-  if (need_to_continue) {
-    equalize_scales(&value_1, &value_2);
-    result = compare_values(value_1, value_2, IS_GREATER);
-  }
-  return result;
+  return compare(value_1, value_2, IS_GREATER);
 }
 
 int s21_is_greater_or_equal(s21_decimal value_1, s21_decimal value_2) {
-  int result = -1;
-  int need_to_continue =
-      fast_sign_check(value_1, value_2, IS_GREATER_OR_EQUAL, &result);
-
-  if (need_to_continue) {
-    equalize_scales(&value_1, &value_2);
-    result = compare_values(value_1, value_2, IS_GREATER_OR_EQUAL);
-  }
-
-  return result;
+  return compare(value_1, value_2, IS_GREATER_OR_EQUAL);
 }
 
 int s21_is_equal(s21_decimal value_1, s21_decimal value_2) {
-  int result = -1;
-  int need_to_continue = fast_sign_check(value_1, value_2, IS_EQUAL, &result);
-  if (need_to_continue) {
-    equalize_scales(&value_1, &value_2);
-    result = compare_values(value_1, value_2, IS_EQUAL);
-  }
-  return result;
+  return compare(value_1, value_2, IS_EQUAL);
 }
 
 int s21_is_not_equal(s21_decimal value_1, s21_decimal value_2) {
+  return compare(value_1, value_2, IS_NOT_EQUAL);
+}
+
+static int compare(s21_decimal value_1, s21_decimal value_2, int type) {
+  if (non_valid_input(value_1, value_2)) {
+    return 0;
+  }
+
   int result = -1;
-  int need_to_continue =
-      fast_sign_check(value_1, value_2, IS_NOT_EQUAL, &result);
+  int need_to_continue = fast_sign_check(value_1, value_2, type, &result);
   if (need_to_continue) {
     equalize_scales(&value_1, &value_2);
-    result = compare_values(value_1, value_2, IS_NOT_EQUAL);
+    result = compare_values(value_1, value_2, type);
   }
   return result;
 }
@@ -104,29 +77,41 @@ static int fast_sign_check(s21_decimal value_1, s21_decimal value_2,
   if (is_value_equal_zero(value_1)) {
     reset_sign(&value_1);
   }
+
   if (is_value_equal_zero(value_2)) {
     reset_sign(&value_2);
   }
+
   int need_to_continue = 1;
   if (is_negative(value_1) && !is_negative(value_2)) {
-    if (type == IS_LESS || type == IS_LESS_OR_EQUAL || type == IS_NOT_EQUAL) {
-      *result = 1;
-      need_to_continue = 0;
-    } else if (type == IS_GREATER || type == IS_GREATER_OR_EQUAL ||
-               type == IS_EQUAL) {
-      *result = 0;
-      need_to_continue = 0;
+    switch (type) {
+      case IS_LESS:
+      case IS_LESS_OR_EQUAL:
+      case IS_NOT_EQUAL:
+        *result = 1;
+        need_to_continue = 0;
+        break;
+      case IS_GREATER:
+      case IS_GREATER_OR_EQUAL:
+      case IS_EQUAL:
+        *result = 0;
+        need_to_continue = 0;
+        break;
     }
   } else if (!is_negative(value_1) && is_negative(value_2)) {
-    if (type == IS_LESS || type == IS_LESS_OR_EQUAL || type == IS_EQUAL) {
-      *result = 0;
-      need_to_continue = 0;
-    } else if (type == IS_GREATER || type == IS_GREATER_OR_EQUAL ||
-               type == IS_NOT_EQUAL) {
-      *result = 1;
-      need_to_continue = 0;
-    }
-    if (is_value_equal_zero(value_1)) {
+    switch (type) {
+      case IS_LESS:
+      case IS_LESS_OR_EQUAL:
+      case IS_EQUAL:
+        *result = 0;
+        need_to_continue = 0;
+        break;
+      case IS_GREATER:
+      case IS_GREATER_OR_EQUAL:
+      case IS_NOT_EQUAL:
+        *result = 1;
+        need_to_continue = 0;
+        break;
     }
   }
   return need_to_continue;
@@ -228,3 +213,11 @@ static void invert_result(int* result) {
 }
 
 static void reset_sign(s21_decimal* value) { value->bits[3] &= ~SIGN_MASK; }
+
+static int non_valid_input(s21_decimal value_1, s21_decimal value_2) {
+  if (is_invalid_scale(value_1) || is_invalid_scale(value_2) ||
+      is_invalid_bits_set(value_1) || is_invalid_bits_set(value_2)) {
+    return 1;
+  }
+  return 0;
+}

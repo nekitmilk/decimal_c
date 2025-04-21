@@ -8,7 +8,7 @@ SRC_DIR = .
 OBJ_DIR = object_files
 TEST_DIR = tests
 
-DECIMAL_SRCS=$(wildcard $(SRC_DIR)/s21*.c) $(SRC_DIR)/utils.c
+DECIMAL_SRCS=$(wildcard $(SRC_DIR)/*.c)
 DECIMAL_HEADER=$(wildcard $(SRC_DIR)/*.h)
 
 TEST_SRCS=$(wildcard $(TEST_DIR)/*.c)
@@ -27,7 +27,6 @@ $(TEST_EXEC): $(LIB) $(TEST_OBJS)
 
 $(OBJ_DIR):
 	@mkdir $@ 
-# -p
 
 $(LIB): $(OBJ_DIR) $(DECIMAL_OBJS)
 	@ar rcs $@ $(DECIMAL_OBJS)
@@ -55,16 +54,15 @@ clean:
 	@rm -rf $(OBJ_DIR) $(LIB) $(TEST_EXEC) $(TEST_DIR)/*.gcda $(TEST_DIR)/*.gcno $(TEST_DIR)/*.gcov $(TEST_DIR)/coverage.info report
 
 format:
-    #@cp ../materials/linters/.clang-format .clang-format
-	@clang-format -i $(SRC_DIR)/*.c $(SRC_DIR)/*.h #$(TEST_DIR)/*.c $(TEST_DIR)/*.h
-    #@rm -f .clang-format
+	@cp ../materials/linters/.clang-format .clang-format
+	@clang-format -i $(SRC_DIR)/*.c $(SRC_DIR)/*.h $(TEST_DIR)/*.c $(TEST_DIR)/*.h
+	@rm -f .clang-format
 
 memory_check: clean $(TEST_EXEC)
-	@valgrind --leak-check=full --quiet $(TEST_EXEC)
-# --errors-for-leak-kinds=all
+	@valgrind --leak-check=full --quiet --errors-for-leak-kinds=all $(TEST_EXEC)
 
 cppcheck:
-	@cppcheck --enable=all --suppress=missingIncludeSystem $(SRC_DIR)*.c $(TEST_DIR)/*.c
+	@cppcheck --enable=all --suppress=missingIncludeSystem $(SRC_DIR)/*.c $(TEST_DIR)/*.c
 
 show_coverage_info: clean gcov_report
 	@yandex-browser report/index.html
